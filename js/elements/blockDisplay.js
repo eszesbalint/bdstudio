@@ -1,11 +1,257 @@
 import * as THREE from 'three';
 
+import { Selectable } from './selectable';
+
 import { intersectDictionaries, mergeDictionaries } from '../utils';
 
-const assetsPath = '1.19/assets/minecraft/';
+const assetsPath = '1.20/assets/minecraft/';
+
+class BlockDisplay extends Selectable {
+    static loadedModels = {}
+
+    constructor(editor) {
+        super(editor);
+        this.isBlockDisplay = true;
+        this._blockState = { name: '', variant: {} };
+        this._possibleVariants = {};
+        this.nbt = '';
+    }
+
+    async updateModel() {
+        let blockStateString = blockStateToString(this.blockState);
+        if (BlockDisplay.loadedModels[blockStateString]) {
+            let { model, possibleVariants } = BlockDisplay.loadedModels[blockStateString];
+            var blockModelGroup = model.clone();
+            blockModelGroup.isBlockModel = true;
+            this._possibleVariants = possibleVariants;
+            var correctedVariant = {};
+        } else {
+            const { name, variant } = this.blockState;
+            var blockModelGroup;
+            var correctedVariant = {}; // Best fitting variant from the blockstate.json
+            this._possibleVariants = {};
+
+            const response = await fetch(assetsPath + 'blockstates/' + name + '.json');
+            const json = await response.json();
+
+            if ('variants' in json) {
+                let max_matches = 0;
+                let best_match = Object.keys(json.variants)[0];
+                for (let v in json.variants) {
+                    const d2 = parseVariantString(v);
+                    for (let key of Object.keys(d2)) {
+                        if (key in this._possibleVariants) {
+                            if (!this._possibleVariants[key].includes(d2[key])) {
+                                this._possibleVariants[key].push(d2[key]);
+                            }
+                        } else {
+                            this._possibleVariants[key] = [undefined];
+                            this._possibleVariants[key].push(d2[key]);
+                        }
+                    }
+                    const intersection = intersectDictionaries(variant, d2);
+                    const len = Object.keys(intersection).length
+                    if (len > max_matches) {
+                        max_matches = len;
+                        best_match = v;
+                    }
+                }
+                let modelId, rotation;
+                if (Array.isArray(json.variants[best_match])) {
+                    let { model, x, y, z } = json.variants[best_match][0];
+                    modelId = model.split('/')[1];
+                    x = x ? x : 0;
+                    y = y ? y : 0;
+                    z = z ? z : 0;
+                    rotation = [x, y, z];
+
+                } else {
+                    let { model, x, y, z } = json.variants[best_match];
+                    modelId = model.split('/')[1];
+                    x = x ? x : 0;
+                    y = y ? y : 0;
+                    z = z ? z : 0;
+                    rotation = [x, y, z];
+                }
 
 
-export function blockStateStringParser(blockState) {
+                correctedVariant = parseVariantString(best_match);
+                blockModelGroup = await loadModel(modelId);
+                blockModelGroup = rotateBlockModelGroup(blockModelGroup, rotation);
+
+            } else if ('multipart' in json) {
+                const models = [];
+                for (let i = 0; i < json.multipart.length; i++) {
+                    const part = json.multipart[i];
+                    if ('when' in part) {
+                        let d2 = {};
+                        if ('AND' in part.when) { 
+                            for (let condition of part.when['AND']) {
+                                d2 = mergeDictionaries(condition, d2);
+                            }
+                        } else {
+                            d2 = part.when;
+                        }
+                        const intersection = intersectDictionaries(variant, d2);
+                        for (let key of Object.keys(d2)) {
+                            if (key in this._possibleVariants) {
+                                if (!this._possibleVariants[key].includes(d2[key])) {
+                                    this._possibleVariants[key].push(d2[key]);
+                                }
+                            } else {
+                                this._possibleVariants[key] = [undefined];
+                                this._possibleVariants[key].push(d2[key]);
+                            }
+                        }
+
+                        if (Object.keys(intersection).length) {
+                            if (Array.isArray(part.apply)) {
+                                models.push(part.apply[0]);
+                            } else {
+                                models.push(part.apply);
+                            }
+                            correctedVariant = mergeDictionaries(correctedVariant, intersection);
+                        }
+                    } else {
+                        if (Array.isArray(part.apply)) {
+                            models.push(part.apply[0]);
+                        } else {
+                            models.push(part.apply);
+                        }
+                        models.push(part.apply);
+                    }
+                }
+
+                blockModelGroup = new THREE.Group();
+                for (let modelPart of models) {
+                    let { model, x, y, z } = modelPart;
+                    let modelId = model.split('/')[1];
+                    x = x ? x : 0;
+                    y = y ? y : 0;
+                    z = z ? z : 0;
+                    let rotation = [x, y, z];
+                    let blockModelPartGroup = await loadModel(modelId);
+                    blockModelPartGroup = rotateBlockModelGroup(blockModelPartGroup, rotation);
+                    blockModelGroup.add(blockModelPartGroup);
+                }
+            } else {
+                throw 'Couldn\'t parse .json for "' + name + '"!'
+            }
+
+            this._blockState = { name: name, variant: correctedVariant }
+            blockModelGroup.isBlockModel = true;
+
+            BlockDisplay.loadedModels[blockStateString] = {
+                model: blockModelGroup,
+                possibleVariants: this._possibleVariants,
+
+            };
+
+
+            
+        }
+        // Remove previously loaded model
+        let prevModelGroups = this.getObjectsByProperty('isBlockModel', true);
+        if (prevModelGroups) { 
+            for (let prevModelGroup of prevModelGroups){
+                prevModelGroup.parent.remove(prevModelGroup);
+            }
+            
+        }
+
+        // Add new model
+        this.add(blockModelGroup);
+
+        // Rename this object
+        this.name = blockStateToString(this._blockState);
+
+        // Update active selection
+        if (this.selected) {
+            this.selected = !this.selected;
+            this.selected = !this.selected;
+        }
+
+        
+
+        return this._blockState;
+    }
+
+    get blockState() { return this._blockState }
+
+    set blockState(a) {
+        if (typeof a === 'string' || a instanceof String) {
+            this._blockState = parseStateString(a);
+        } else {
+            this._blockState = a;
+        }
+
+        // Rename this object
+        this.name = blockStateToString(this._blockState);
+        this.updateModel();
+        return this._blockState;
+    }
+
+    toDict(keepUUID = false) {
+        let dict = {
+            name: this.name,
+            nbt: this.nbt,
+            transforms: this.matrix.clone().transpose().toArray(),
+        };
+        if (keepUUID) dict.uuid = this.uuid;
+        return dict;
+    }
+
+    static async fromDict(editor, dict, keepUUID = false) {
+        let { name, transforms, nbt, children, uuid } = dict;
+        let newObject = new BlockDisplay(editor);
+        newObject.blockState = name;
+        newObject.nbt = nbt;
+        if (keepUUID) newObject.uuid = uuid;
+        await newObject.updateModel();
+
+        let matrix = new THREE.Matrix4();
+        matrix.set(...transforms);
+        newObject.applyMatrix4(matrix);
+        return newObject;
+    }
+
+    toNBT() {
+        const { name, variant } = this.blockState;
+
+        // Properties tag
+        let properties = '';
+        for (let key of Object.keys(variant)) {
+            properties += `${key}:"${variant[key]}",`
+        }
+        properties = properties.slice(0, -1);
+
+        // Transformations tag
+        let matrix = this.matrixWorld.clone();
+        let array = matrix.transpose().toArray();
+        let arrayTrunc = [];
+        for (let x of array) {
+            arrayTrunc.push(x.toFixed(4));
+        }
+        const transformation = JSON.stringify(arrayTrunc).replaceAll('"', '').replaceAll(',', 'f,').replace(']', 'f]');
+
+        // Additional tags, inherited from parent
+        let object = this;
+        let nbt = '';
+        while (object.parent) {
+            if (object.nbt) {
+                nbt += `,${object.nbt}`;
+            }
+            object = object.parent;
+        }
+
+        let nbtString = `{id:"minecraft:block_display",block_state:{Name:"minecraft:${name}",Properties:{${properties}}},transformation:${transformation}${nbt}}`;
+
+        return nbtString;
+    }
+}
+
+
+function parseStateString(blockState) {
     // Block state should be in the format
     // "name" or
     // "minecraft:name" or
@@ -44,8 +290,6 @@ function parseVariantString(variantString) {
     }
     return variant;
 }
-
-
 
 async function loadModel(modelPath, isFirstRecursionLevel = true) {
     const response = await fetch(assetsPath + 'models/block/' + modelPath + '.json');
@@ -140,7 +384,7 @@ async function loadModel(modelPath, isFirstRecursionLevel = true) {
         box.setAttribute('uv', UVs);
 
         // Loading and setting textures
-        let materials = Array(6).fill(new THREE.MeshBasicMaterial({ color: '#000', transparent: true, opacity: 0.0 }));
+        let materials = Array(6).fill(new THREE.MeshBasicMaterial({ color: '#000', transparent: true, opacity: 0.0, alphaTest: 0.01 }));
         for (const [faceName, face] of Object.entries(faces)) {
             let { texture } = face;
             let textureId = texture;
@@ -152,12 +396,13 @@ async function loadModel(modelPath, isFirstRecursionLevel = true) {
             texturePath = assetsPath + 'textures/block/' + texturePath + '.png';
             const textureFile = await textureLoader.loadAsync(texturePath);
             textureFile.magFilter = THREE.NearestFilter;
-            const material = new THREE.MeshStandardMaterial({ 
-                map: textureFile, 
+            const material = new THREE.MeshStandardMaterial({
+                map: textureFile,
                 transparent: true,
-                
-                
+
+
             });
+            material.alphaTest = 0.01;
             const materialIndex = getVertexIndicesForFace(faceName)[0] / 4;
             materials[materialIndex] = material;
         }
@@ -195,6 +440,7 @@ async function loadModel(modelPath, isFirstRecursionLevel = true) {
             const angle = THREE.MathUtils.degToRad(element.rotation.angle + 180);
             switch (element.rotation.axis) {
                 case 'x':
+                    
                     rotationGroup.rotateX(angle);
                     break;
 
@@ -203,6 +449,7 @@ async function loadModel(modelPath, isFirstRecursionLevel = true) {
                     break;
 
                 case 'z':
+                    
                     rotationGroup.rotateZ(angle);
                     break;
             }
@@ -269,149 +516,6 @@ function rotateBlockModelGroup(blockModelGroup, rotation = [0, 0, 0]) {
     return newBlockModelGroup;
 }
 
-export let bs = {
-    _blockState: { name: '', variant: {} },
-    _possibleVariants: {},
-    async updateModel() {
-        const { name, variant } = this.blockState;
-        var blockModelGroup;
-        var correctedVariant = {}; // Best fitting variant from the blockstate.json
-        this._possibleVariants = {};
-
-        const response = await fetch(assetsPath + 'blockstates/' + name + '.json');
-        const json = await response.json();
-
-        if ('variants' in json) {
-            let max_matches = 0;
-            let best_match = Object.keys(json.variants)[0];
-            for (let v in json.variants) {
-                const d2 = parseVariantString(v);
-                for (let key of Object.keys(d2)){
-                    if (key in this._possibleVariants){
-                        if (!this._possibleVariants[key].includes(d2[key])) {
-                            this._possibleVariants[key].push(d2[key]);
-                        }
-                    } else {
-                        this._possibleVariants[key] = [undefined];
-                        this._possibleVariants[key].push(d2[key]);
-                    }
-                }
-                const intersection = intersectDictionaries(variant, d2);
-                const len = Object.keys(intersection).length
-                if (len > max_matches) {
-                    max_matches = len;
-                    best_match = v;
-                }
-            }
-            let modelId, rotation;
-            if (Array.isArray(json.variants[best_match])) {
-                let { model, x, y, z } = json.variants[best_match][0];
-                modelId = model.split('/')[1];
-                x = x ? x : 0;
-                y = y ? y : 0;
-                z = z ? z : 0;
-                rotation = [x, y, z];
-
-            } else {
-                let { model, x, y, z } = json.variants[best_match];
-                modelId = model.split('/')[1];
-                x = x ? x : 0;
-                y = y ? y : 0;
-                z = z ? z : 0;
-                rotation = [x, y, z];
-            }
-
-
-            correctedVariant = parseVariantString(best_match);
-            blockModelGroup = await loadModel(modelId);
-            blockModelGroup = rotateBlockModelGroup(blockModelGroup, rotation);
-
-        } else if ('multipart' in json) {
-            const models = [];
-            for (let i = 0; i < json.multipart.length; i++) {
-                const part = json.multipart[i];
-                if ('when' in part) {
-                    const d2 = part.when;
-                    const intersection = intersectDictionaries(variant, d2);
-                    for (let key of Object.keys(d2)){
-                        if (key in this._possibleVariants){
-                            if (!this._possibleVariants[key].includes(d2[key])) {
-                                this._possibleVariants[key].push(d2[key]);
-                            }
-                        } else {
-                            this._possibleVariants[key] = [undefined];
-                            this._possibleVariants[key].push(d2[key]);
-                        }
-                    }
-
-                    if (Object.keys(intersection).length) {
-                        if (Array.isArray(part.apply)) {
-                            models.push(part.apply[0]);
-                        } else {
-                            models.push(part.apply);
-                        }
-                        correctedVariant = mergeDictionaries(correctedVariant, part.when);
-                    }
-                } else {
-                    if (Array.isArray(part.apply)) {
-                        models.push(part.apply[0]);
-                    } else {
-                        models.push(part.apply);
-                    }
-                    models.push(part.apply);
-                }
-            }
-
-            blockModelGroup = new THREE.Group();
-            for (let modelPart of models) {
-                let { model, x, y, z } = modelPart;
-                let modelId = model.split('/')[1];
-                x = x ? x : 0;
-                y = y ? y : 0;
-                z = z ? z : 0;
-                let rotation = [x, y, z];
-                let blockModelPartGroup = await loadModel(modelId);
-                blockModelPartGroup = rotateBlockModelGroup(blockModelPartGroup, rotation);
-                blockModelGroup.add(blockModelPartGroup);
-            }
-        } else {
-            throw 'Couldn\'t parse .json for "' + name + '"!'
-        }
-
-        
-        this._blockState = {name: name, variant: correctedVariant}
-        blockModelGroup.isBlockModel = true;
-
-        // Remove previously loaded model
-        let prevModelGroup = this.getObjectsByProperty('isBlockModel', true)[0];
-        if (prevModelGroup) {this.remove(prevModelGroup)}
-        
-        // Add new model
-        this.add(blockModelGroup);
-
-        // Rename this object
-        this.name = blockStateToString(this._blockState);
-
-        return this._blockState;
-    },
-    get blockState() { return this._blockState },
-    set blockState(dict) {
-        this._blockState = dict;
-        // Rename this object
-        this.name = blockStateToString(this._blockState);
-        return this._blockState;
-    }
-};
-
-export async function loadBlockState(blockStateString) {
-    let blockModelGroup = new THREE.Group();
-    blockModelGroup.name = blockStateString;
-    Object.assign(blockModelGroup, bs);
-    blockModelGroup.blockState = blockStateStringParser(blockStateString);
-    await blockModelGroup.updateModel();
-    return blockModelGroup;
-}
-
 function blockStateToString(blockState) {
     if (Object.keys(blockState.variant).length === 0) {
         return blockState.name;
@@ -420,4 +524,4 @@ function blockStateToString(blockState) {
     }
 }
 
-export { assetsPath };
+export { BlockDisplay, assetsPath, parseStateString };

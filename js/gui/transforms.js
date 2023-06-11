@@ -1,4 +1,6 @@
-import { GUI } from 'lil-gui';
+import { GUI } from './guiClass';
+
+import { TransformCommand } from '../commands/commands.js';
 
 class TransformsGUI extends GUI {
     constructor(editor, parentDom = document.getElementById('side_container')) {
@@ -8,43 +10,67 @@ class TransformsGUI extends GUI {
         this.parentDom.appendChild(this.domElement);
         this.editor = editor;
 
+
+    }
+
+    update() {
+        let scope = this;
+        scope.empty();
+
+        let object = scope.editor.find('selected')[0];
+        if (!object) return;
+
+        
+
+        let toHistory = function (func) {
+            let command = new TransformCommand(scope.editor, object);
+            object.updateMatrix();
+            command.beforeMatrix = object.matrix.clone();
+
+            func();
+
+            object.updateMatrix();
+            command.afterMatrix = object.matrix.clone();
+            scope.editor.history.push(command);
+        }
+
         const folderPosition = this.addFolder('Position');
         const propsPosition = {
 
             get 'X'() {
 
-                return editor.currentObject.position.x;
+                return object.position.x;
 
             },
             set 'X'(v) {
-
-                editor.currentObject.position.setX(v);
-                editor.render();
-
+                toHistory(function () {
+                    object.position.setX(v);
+                    scope.editor.render();
+                });
             },
 
             get 'Y'() {
 
-                return editor.currentObject.position.y;
+                return object.position.y;
 
             },
             set 'Y'(v) {
-
-                editor.currentObject.position.setY(v);
-                editor.render();
-
+                toHistory(function () {
+                    object.position.setY(v);
+                    scope.editor.render();
+                });
             },
 
             get 'Z'() {
 
-                return editor.currentObject.position.z;
+                return object.position.z;
 
             },
             set 'Z'(v) {
-
-                editor.currentObject.position.setZ(v);
-                editor.render();
-
+                toHistory(function () {
+                    object.position.setZ(v);
+                    scope.editor.render();
+                });
             },
 
         };
@@ -57,38 +83,38 @@ class TransformsGUI extends GUI {
 
             get 'X'() {
 
-                return editor.currentObject.rotation.x;
+                return object.rotation.x;
 
             },
             set 'X'(v) {
-
-                editor.currentObject.rotation.x = v;
-                editor.render();
-
+                toHistory(function () {
+                    object.rotation.x = v;
+                    scope.editor.render();
+                });
             },
 
             get 'Y'() {
 
-                return editor.currentObject.rotation.y;
+                return object.rotation.y;
 
             },
             set 'Y'(v) {
-
-                editor.currentObject.rotation.y = v;
-                editor.render();
-
+                toHistory(function () {
+                    object.rotation.y = v;
+                    scope.editor.render();
+                });
             },
 
             get 'Z'() {
 
-                return editor.currentObject.rotation.z;
+                return object.rotation.z;
 
             },
             set 'Z'(v) {
-
-                editor.currentObject.rotation.z = v;
-                editor.render();
-
+                toHistory(function () {
+                    object.rotation.z = v;
+                    scope.editor.render();
+                });
             },
 
         };
@@ -101,38 +127,38 @@ class TransformsGUI extends GUI {
 
             get 'X'() {
 
-                return editor.currentObject.scale.x;
+                return object.scale.x;
 
             },
             set 'X'(v) {
-
-                editor.currentObject.scale.setX(v);
-                editor.render();
-
+                toHistory(function () {
+                    object.scale.setX(v);
+                    scope.editor.render();
+                });
             },
 
             get 'Y'() {
 
-                return editor.currentObject.scale.y;
+                return object.scale.y;
 
             },
             set 'Y'(v) {
-
-                editor.currentObject.scale.setY(v);
-                editor.render();
-
+                toHistory(function () {
+                    object.scale.setY(v);
+                    scope.editor.render();
+                });
             },
 
             get 'Z'() {
 
-                return editor.currentObject.scale.z;
+                return object.scale.z;
 
             },
             set 'Z'(v) {
-
-                editor.currentObject.scale.setZ(v);
-                editor.render();
-
+                toHistory(function () {
+                    object.scale.setZ(v);
+                    scope.editor.render();
+                });
             },
 
         };

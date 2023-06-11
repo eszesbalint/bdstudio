@@ -1,4 +1,4 @@
-import { blockStateStringParser } from './loaders/BlockModelLoader.js';
+import { parseStateString } from './elements/blockDisplay.js';
 
 function minecraftSummonCommandFromObjects(objects) {
     let command = '/summon block_display ~-0.5 ~-0.5 ~-0.5 {Passengers:[';
@@ -6,7 +6,7 @@ function minecraftSummonCommandFromObjects(objects) {
     for (let object of objects.getObjectsByProperty('isBlockDisplay', true)) {
         passengers += '{id:\"minecraft:block_display\",';
         passengers += 'block_state:'
-        const { name, variant } = blockStateStringParser(object.name);
+        const { name, variant } = parseStateString(object.name);
         passengers += '{Name:\"' + name + '\"';
         if (Object.keys(variant).length === 0) {
 
@@ -103,7 +103,7 @@ function printSceneGraph(scene) {
 
         }
 
-        console.log(s + obj.name + ' <' + obj.type + '>');
+        console.log(s + obj.name + ' <' + obj.type + '> ' + obj.uuid);
 
     });
 }

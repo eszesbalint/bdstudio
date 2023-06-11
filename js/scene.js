@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 
-
 import { InfiniteGridHelper } from './addons/InfiniteGridHelper';
+
+import { Collection } from './elements/elements.js';
 
 class Scene {
     constructor( editor ) {
@@ -25,6 +26,7 @@ class Scene {
 
         // Adding grid helper
         const grid = new InfiniteGridHelper(4, 64, new THREE.Color(0.2, 0.2, 0.2));
+        grid.material.alphaTest = 0.5;
         grid.scale.set(1 / 64, 1 / 64, 1 / 64);
         grid.position.set(0, -0.001, 0);
         editor.scene.add(grid);
@@ -53,9 +55,7 @@ class Scene {
 
         
 
-        editor.objects = new THREE.Group();
-        editor.scene.add(editor.objects);
-        editor.currentObject = editor.objects;
+        
 
         
 

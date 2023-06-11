@@ -5,54 +5,57 @@ import { TransformControls } from 'three/addons/controls/TransformControls.js';
 
 import { arrayEquals, compressJSON, decompressJSON } from './utils.js';
 
+import { TransformCommand, DuplicateCommand } from './commands/commands.js'
+
 class Controls {
     shiftDown = false;
     ctrlDown = false;
 
     constructor(editor) {
         editor.orbit = new OrbitControls(editor.currentCamera, editor.renderer.domElement);
-        //editor.orbit.update();
+        editor.orbit.target.set(0.5, 0.5, 0.5);
+        editor.orbit.update();
 
         editor.control = new TransformControls(editor.currentCamera, editor.renderer.domElement);
         editor.control.setTranslationSnap(1 / 16);
         editor.control.setRotationSnap(THREE.MathUtils.degToRad(15));
         editor.control.setScaleSnap(1 / 16);
         editor.scene.add(editor.control);
-        
+
         let controls = this;
 
         window.addEventListener('keydown', async function (event) {
 
-            switch (event.keyCode) {
+            switch (event.key) {
 
-                case 81: // Q
-                    editor.control.setSpace(editor.Controlscontrol.space === 'local' ? 'world' : 'local');
+                case 'q': // Q
+                    editor.control.setSpace(editor.control.space === 'local' ? 'world' : 'local');
                     break;
 
-                case 16: // Shift
+                case 'Shift': // Shift
                     editor.control.setTranslationSnap(null);
                     editor.control.setRotationSnap(null);
                     editor.control.setScaleSnap(null);
                     controls.shiftDown = true;
                     break;
 
-                case 17: // Ctrl
+                case 'Control': // Ctrl
                     controls.ctrlDown = true;
                     break;
 
-                case 84: // T
+                case 't': // T
                     editor.control.setMode('translate');
                     break;
 
-                case 82: // R
+                case 'r': // R
                     editor.control.setMode('rotate');
                     break;
 
-                case 83: // S
+                case 's': // S
                     editor.control.setMode('scale');
                     break;
 
-                case 79: // O
+                case 'o': // O
                     const position = editor.currentCamera.position.clone();
 
                     editor.currentCamera = editor.currentCamera.isPerspectiveCamera ? editor.cameraOrtho : editor.cameraPersp;
@@ -65,77 +68,79 @@ class Controls {
                     onWindowResize();
                     break;
 
-                case 107: // +, =, num+
+                case '+': // +, =, num+
                     editor.control.setSize(editor.control.size + 0.1);
                     break;
 
                 case 189:
-                case 109: // -, _, num-
+                case '-': // -, _, num-
                     editor.control.setSize(Math.max(editor.control.size - 0.1, 0.1));
                     break;
 
-                case 88: // X
+                case 'x': // X
                     editor.control.showX = !editor.control.showX;
                     break;
 
-                case 89: // Y
-                    editor.control.showY = !editor.control.showY;
+                case 'y': // Y
+
+                    if (event.ctrlKey) {
+                        editor.redo();
+                    } else {
+                        editor.control.showY = !editor.control.showY;
+                    }
                     break;
 
-                case 90: // Z
-                    editor.control.showZ = !editor.control.showZ;
+                case 'z': // Z
+                    if (event.ctrlKey) {
+                        editor.undo();
+                    } else {
+                        editor.control.showZ = !editor.control.showZ;
+                    }
                     break;
 
-                case 32: // Spacebar
-                    editor.control.enabled = !editor.control.enabled;
+                case 'Delete': // Del
+                    editor.control.detach();
+                    editor.delete();
+                    editor.update();
                     break;
 
-                case 27: // Esc
-                    editor.control.reset();
-                    break;
-
-                case 46: // Del
-                    editor.deleteBlockDisplay();
-                    editor.gui.elements.update();
-                    editor.render();
-                    break;
-
-                case 67: // C
+                case 'c': // C
                     if (controls.ctrlDown) {
-                        let selected = editor.objects.getObjectsByProperty('selected', true);
-                        if (selected.length) {
-                            editor.clipboard = await editor.duplicateBlockDisplay(selected, false);
-                        }
+                    //    let objects = editor.find('selected');
+                    //    editor.clipboard = editor.objectsToJSON(objects, false);
                     }
                     break;
 
-                case 86: // V
+                case 'v': // V
                     if (controls.ctrlDown) {
-                        const duplicates = await editor.duplicateBlockDisplay(editor.clipboard);
-                        editor.selectBlockDisplay();
-                        for (let object of duplicates) {
-                            object.selected = true;
-                        }
-                        editor.gui.elements.update();
-                        editor.render();
+                        //this.gui.loading.show('Pasting');
+                        //let objects = await this.editor.objectsFromJSON(editor.clipboard, false);
+                        //this.control.detach();
+                        //let command = new DuplicateCommand(this, objects);
+                        //this.history.push(command);
+                        //await command.execute();
+                        //this.gui.loading.hide();
                     }
                     break;
 
-                case 71: // G
+                case 'd': // D
+                    editor.duplicate();
+                    editor.update();
+                    break;
 
-                    editor.toggleGrouping();
-                    editor.gui.elements.update();
-                    editor.render();
+                case 'g': // G
+                    editor.control.detach();
+                    editor.group();
+                    editor.update();
 
                     break;
 
-                case 65: // A
+                case 'a': // A
+                    if (controls.ctrlDown) {
+                        editor.selectAll();
 
-
-                    for (let object of editor.objects.children) {
-                        object.selected = true;
                     }
-                    editor.render();
+                    editor.update();
 
                     break;
 
@@ -145,16 +150,16 @@ class Controls {
 
         window.addEventListener('keyup', function (event) {
 
-            switch (event.keyCode) {
+            switch (event.key) {
 
-                case 16: // Shift
+                case 'Shift': // Shift
                     editor.control.setTranslationSnap(1 / 16);
                     editor.control.setRotationSnap(THREE.MathUtils.degToRad(15));
                     editor.control.setScaleSnap(1 / 16);
                     controls.shiftDown = false;
                     break;
 
-                case 17: // Ctrl
+                case 'Control': // Ctrl
                     controls.ctrlDown = false;
                     break;
 
@@ -164,7 +169,56 @@ class Controls {
 
         editor.orbit.addEventListener('change', editor.render);
 
+        editor.control.addEventListener('change', function (event) {
+            // Limit the scaling of collection to a uniform scaling
+            // while keeping the ability to flip along axes
+            let object = editor.control.object;
+            if (editor.control.mode === 'scale' && object) {
+                const x = object.scale.x;
+                const y = object.scale.y;
+                const z = object.scale.z;
+                const xA = Math.abs(x);
+                const yA = Math.abs(y);
+                const zA = Math.abs(z);
+                if (object.isCollection) {
+                    switch (editor.control.axis) {
+                        case 'X':
+                            object.scale.set(xA, xA, xA);
+                            break;
+                        case 'Y':
+                            object.scale.set(yA, yA, yA);
+                            break;
+                        case 'Z':
+                            object.scale.set(zA, zA, zA);
+                            break;
+                    }
+                    
+                } else if (object.isBlockDisplay) {
+                    object.scale.set(xA, yA, zA);
+                }
+                object.updateMatrix();
+            }
+            
+        });
+
         editor.control.addEventListener('change', editor.render);
+
+
+
+        let transformCommand;
+
+        editor.control.addEventListener('mouseDown', function (event) {
+            transformCommand = new TransformCommand(editor, editor.control.object);
+            editor.control.object.updateMatrix();
+            transformCommand.beforeMatrix = editor.control.object.matrix.clone();
+        });
+
+        editor.control.addEventListener('mouseUp', function (event) {
+            editor.control.object.updateMatrix();
+            transformCommand.afterMatrix = editor.control.object.matrix.clone();
+            editor.history.push(transformCommand);
+            editor.gui.command.update();
+        });
 
         editor.control.addEventListener('dragging-changed', function (event) {
 
@@ -182,7 +236,7 @@ class Controls {
         editor.renderer.domElement.addEventListener('mouseup', function (event) {
             let prevMouse = mouse;
             mouse = [event.clientX, event.clientY];
-            if (!arrayEquals(prevMouse, mouse)) { return };
+            if (!arrayEquals(prevMouse, mouse)) return;
 
             let mouseVector = new THREE.Vector2((event.clientX / window.innerWidth) * 2 - 1,
                 -(event.clientY / window.innerHeight) * 2 + 1);
@@ -195,20 +249,18 @@ class Controls {
                 if (object.isBoundingBox) {
                     continue;
                 } else {
-                    while (!(object.parent === editor.objects)) {
+                    while (object.parent && !object.isBlockDisplay) {
                         object = object.parent;
                     }
-                    editor.selectBlockDisplay(object);
-                    editor.gui.elements.update();
-                    editor.render();
+                    object.selected = true;
                     return;
                 }
 
             }
 
-            editor.selectBlockDisplay();
-            editor.gui.elements.update();
-            editor.render();
+            for (let object of editor.find('selected')) {
+                object.selected = false;
+            }
         });
 
         window.addEventListener('resize', function (event) {
@@ -227,13 +279,29 @@ class Controls {
         });
 
         window.addEventListener("load", async function (e) {
+            editor.gui.loading.show('Reloading last session');
             let json = await decompressJSON(localStorage.getItem('blockDisplayObjects'));
-            await editor.objectsFromJSON(json);
-            editor.render();
-            editor.gui.elements.update();
+            let objects = await editor.objectsFromJSON(json);
+            if (objects.length === 0) {
+                editor.gui.loading.hide();
+                return;
+            }
+            editor.scene.remove(editor.objects);
+            editor.objects = objects[0];
+            editor.scene.add(editor.objects);
+
+
+
+            editor.update();
+            editor.gui.loading.hide();
         });
         window.addEventListener("beforeunload", async function (e) {
-            localStorage.setItem('blockDisplayObjects', await compressJSON(editor.objectsToJSON()));
+            localStorage.setItem(
+                'blockDisplayObjects',
+                await compressJSON(
+                    editor.objectsToJSON([editor.objects])
+                )
+            );
         });
     }
 }

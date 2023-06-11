@@ -1,5 +1,10 @@
 @import 'bootstrap-icons/font/bootstrap-icons';
 
+:root {
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    --font-family-mono: Menlo, Monaco, Consolas, "Droid Sans Mono", monospace;
+}
+
 canvas {
     position: fixed;
     top: 0px;
@@ -19,6 +24,11 @@ canvas {
 	--number-color: #fa0000;
 	--string-color: #2af868;
     border-radius: 4pt;
+}
+
+
+.lil-gui .children:empty::before {
+    display: none;
 }
 
 #side_container,
@@ -98,6 +108,11 @@ canvas {
     --name-width: 40px;
 }
 
+#searchResults .children {
+    max-height: 512px;
+    overflow-y: scroll;
+}
+
 #commandGUI {
     min-width: var(--width);
     flex-grow: 3;
@@ -117,12 +132,18 @@ canvas {
     border-radius: var(--widget-border-radius);
     background: var(--widget-color);
     color: var(--string-color);
-    
     padding: 0 var(--padding);
     margin: var(--spacing) 0;
 }
 
+#elementsGUI.lil-gui .lil-gui .children {
+    margin-left: 16px;
+}
 
+#elementsGUI > .children {
+    max-height: 512px;
+    overflow-y: scroll;
+}
 
 .title {
     white-space: nowrap;
@@ -130,10 +151,52 @@ canvas {
     text-overflow: ellipsis;
 }
 
-.selected .title {
+.selected > .title {
     color: yellow;
 }
 
-.selected.collection .title {
+.selected.collection > .title {
     color: green;
+}
+
+#loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.26);
+    backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.custom-loader {
+    width: 40px;
+    height: 40px;
+    color:#FFFFFF;
+    background:
+      linear-gradient(currentColor 0 0),
+      linear-gradient(currentColor 0 0),
+      linear-gradient(currentColor 0 0),
+      linear-gradient(currentColor 0 0);
+    background-size: 21px 21px;
+    background-repeat:no-repeat;
+    border-radius: 4pt;
+    animation: sh5 1.5s infinite cubic-bezier(0.3,1,0,1);
+}
+@keyframes sh5 {
+   0%   {background-position: 0    0,100% 0   ,100% 100%,0 100%}
+   33%  {background-position: 0    0,100% 0   ,100% 100%,0 100%;width:60px;height: 60px}
+   66%  {background-position: 100% 0,100% 100%,0    100%,0 0   ;width:60px;height: 60px}
+   100% {background-position: 100% 0,100% 100%,0    100%,0 0   }
+}
+
+#loading span {
+    padding: 32px;
+    font-family: var(--font-family);
+    color: white;
 }

@@ -1,0 +1,7 @@
+node_modules/
+.git/
+package-lock.json
+package.json
+public/1.19/
+public/1.20/
+dist/

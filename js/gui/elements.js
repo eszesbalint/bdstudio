@@ -1,7 +1,8 @@
-import { GUI } from 'lil-gui';
+import { GUI } from './guiClass';
+
 
 class ElementsGUI extends GUI {
-    constructor(editor, parentDom=document.getElementById('side_container')) {
+    constructor(editor, parentDom = document.getElementById('side_container')) {
         super({ autoPlace: false, title: 'Elements' });
         this.parentDom = parentDom;
         this.domElement.id = 'elementsGUI';
@@ -11,60 +12,62 @@ class ElementsGUI extends GUI {
     }
 
     update() {
-        let editor = this.editor;
-        this.destroy();
-        this.parentDom.appendChild(this.domElement);
-        for (let object of editor.objects.children) {
-            const folderBlockDisplay = this.addFolder(object.name);
-            folderBlockDisplay.close();
-            if (object.selected) {
-                folderBlockDisplay.domElement.classList.add('selected');
-                if (object.isCollection) {
-                    folderBlockDisplay.domElement.classList.add('collection');
+        let scope = this;
+        scope.empty();
+
+
+
+        let buildRecursively = function (parentGUI, object) {
+
+            const folder = parentGUI.addFolder(object.name);
+            //folder.closeFolders = true;
+
+            if (!(object === scope.editor.objects)) {
+                folder.onOpenClose(changedGUI => {
+                    object.selected = true;
+                });
+
+
+                if (object.selected) {
+                    folder.domElement.classList.add('selected');
+                    if (object.isCollection) {
+                        folder.domElement.classList.add('collection');
+                    }
+
+                } else if (object.getObjectByProperty('selected', true)) {
+
+                } else {
+                    folder.domElement.classList.add('closed');
+                    return;
                 }
-                folderBlockDisplay.open();
             }
-            folderBlockDisplay.onOpenClose(changedGUI => {
-                editor.selectBlockDisplay(object);
-                editor.control.attach(object);
-                editor.gui.elements.update();
-                editor.render();
-            });
-            const propBlockDisplay = {
-                'Delete'() {
-                    editor.deleteBlockDisplay(object);
-                    editor.gui.elements.update();
-                    editor.render();
-                },
-                'Duplicate': async function () {
-                    await editor.duplicateBlockDisplay(object);
-                    editor.gui.elements.update();
-                    editor.render();
-                }
-            };
+
+
+
             if (object.isBlockDisplay) {
-                for (let key of Object.keys(object._possibleVariants)) {
 
-                    let controller = folderBlockDisplay.add(
-                        object.blockState.variant,
-                        key,
-                        object._possibleVariants[key]
-                    );
-                    controller.onChange(async function (v) {
-                        if (v) {
-                            object.blockState.variant[key] = v;
-                        }
-                        await object.updateModel();
-                        editor.render();
-                        editor.gui.elements.update();
-                    });
-                }
+            } else if (object.isCollection) {
+                forEachChild(object, function (child) {
+                    if (child.isBlockDisplay || child.isCollection) {
+                        buildRecursively(folder, child);
+                    }
+                });
             }
-            folderBlockDisplay.add(propBlockDisplay, 'Duplicate');
-            folderBlockDisplay.add(propBlockDisplay, 'Delete');
-
-
         }
+
+
+        buildRecursively(scope, scope.editor.objects);
+
+    }
+}
+
+function forEachChild(object, func) {
+    let sorted = object.children.sort(function (a, b) {
+        if (a.id < b.id) return -1;
+        if (a.id > b.id) return 1;
+    });
+    for (let child of sorted) {
+        func(child);
     }
 }
 

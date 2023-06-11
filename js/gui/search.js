@@ -1,6 +1,6 @@
 import { GUI } from 'lil-gui';
 
-import { assetsPath } from '../loaders/BlockModelLoader';
+import { assetsPath } from '../elements/blockDisplay.js';
 
 class SearchGUI extends GUI {
     constructor(editor, parentDom = document.getElementById('top_container')) {
@@ -28,13 +28,16 @@ class SearchGUI extends GUI {
 
         this.add(propsSearch, 'text').name('Search').listen();
         const folderResults = this.addFolder('Results');
+        folderResults.domElement.id = 'searchResults';
 
         this.update();
     }
 
     async update(searchTerm='') {
+        let scope = this;
         this.folders[0].destroy();
         const folderResults = this.addFolder('Results');
+        folderResults.domElement.id = 'searchResults';
 
 
 
@@ -44,12 +47,13 @@ class SearchGUI extends GUI {
 
         for (let blockState of blockStateList) {
             if ((blockState + ' ').includes(searchTerm)) {
-                let searchGUI = this;
+                
                 const propResults = {
                     'add': async function () {
-                        searchGUI.editor.selectBlockDisplay(await searchGUI.editor.addBlockDisplay(blockState));
-                        searchGUI.editor.gui.elements.update();
-                        searchGUI.editor.render();
+                        
+                        let object = await scope.editor.add(blockState);
+                        object.selected = true;
+                        
                     }
                 };
                 folderResults.add(propResults, 'add').name(blockState);
