@@ -256,6 +256,7 @@ class Editor {
             // here we tell the reader what to do when it's done reading...
             reader.onload = async readerEvent => {
                 var content = readerEvent.target.result; // this is the content!
+                try {
                 let json = await decompressJSON(content);
                 scope.gui.loading.show(`Loading ${JSON.parse(json)[0].name}`);
                 let objects = await scope.objectsFromJSON(json);
@@ -266,6 +267,11 @@ class Editor {
 
                 scope.update()
                 scope.gui.loading.hide();
+                } catch (error) {
+                    alert('File is not a valid a .bdstudio file!');
+                    scope.gui.loading.hide();
+                    return;
+                }
             }
 
         }

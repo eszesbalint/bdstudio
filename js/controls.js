@@ -106,8 +106,8 @@ class Controls {
 
                 case 'c': // C
                     if (controls.ctrlDown) {
-                    //    let objects = editor.find('selected');
-                    //    editor.clipboard = editor.objectsToJSON(objects, false);
+                        //    let objects = editor.find('selected');
+                        //    editor.clipboard = editor.objectsToJSON(objects, false);
                     }
                     break;
 
@@ -192,13 +192,13 @@ class Controls {
                             object.scale.set(zA, zA, zA);
                             break;
                     }
-                    
+
                 } else if (object.isBlockDisplay) {
                     object.scale.set(xA, yA, zA);
                 }
                 object.updateMatrix();
             }
-            
+
         });
 
         editor.control.addEventListener('change', editor.render);
@@ -279,21 +279,24 @@ class Controls {
         });
 
         window.addEventListener("load", async function (e) {
-            editor.gui.loading.show('Reloading last session');
-            let json = await decompressJSON(localStorage.getItem('blockDisplayObjects'));
-            let objects = await editor.objectsFromJSON(json);
-            if (objects.length === 0) {
+            try {
+                editor.gui.loading.show('Reloading last session');
+                let json = await decompressJSON(localStorage.getItem('blockDisplayObjects'));
+                let objects = await editor.objectsFromJSON(json);
+                if (objects.length === 0) {
+                    editor.gui.loading.hide();
+                    return;
+                }
+                editor.scene.remove(editor.objects);
+                editor.objects = objects[0];
+                editor.scene.add(editor.objects);
+                editor.update();
+                editor.gui.loading.hide();
+            } catch (error) {
+                alert(`Couldn't load last session!`);
                 editor.gui.loading.hide();
                 return;
             }
-            editor.scene.remove(editor.objects);
-            editor.objects = objects[0];
-            editor.scene.add(editor.objects);
-
-
-
-            editor.update();
-            editor.gui.loading.hide();
         });
         window.addEventListener("beforeunload", async function (e) {
             localStorage.setItem(
