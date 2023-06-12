@@ -141,7 +141,7 @@ class Editor {
             this.gui.loading.hide();
             return;
         }
-        
+
         this.history.push(command);
         this.gui.loading.hide();
         return blockDisplay;
@@ -152,7 +152,9 @@ class Editor {
         if (objectList.length === 1) { this.ungroup(); return; }
         let command = new GroupCommand(this, objectList);
         this.history.push(command);
-        return command.execute();
+        let group = command.execute();
+        group.selected = true;
+        return group;
     }
 
     ungroup() {
@@ -163,21 +165,29 @@ class Editor {
         return command.execute();
     }
 
-    selectAll() {
-        this.controls.shiftDown = true;
-        for (let object of this.objects.children) {
-            object.selected = true;
+    selectAll(objects) {
+
+        if (!objects) objects = this.objects.children;
+
+        for (let object of objects) {
+            if (objects.length > 1) {
+                this.controls.shiftDown = true;
+                object.selected = true;
+                this.controls.shiftDown = false;
+            } else {
+                object.selected = true;
+            }
         }
-        this.controls.shiftDown = false;
-        
+
+
     }
 
     selectNone() {
-        this.controls.shiftDown = true;
+        //this.controls.shiftDown = true;
         for (let object of this.objects.children) {
             object.selected = false;
         }
-        this.controls.shiftDown = false;
+        //this.controls.shiftDown = false;
     }
 
     delete() {
@@ -196,7 +206,9 @@ class Editor {
         this.control.detach();
         let command = new DuplicateCommand(this, objects);
         this.history.push(command);
-        await command.execute();
+        objects = await command.execute();
+        this.selectNone();
+        this.selectAll(objects);
         this.gui.loading.hide();
     }
 
@@ -205,23 +217,23 @@ class Editor {
         let passengers = [''];
         let counter = 0;
         let commands = [];
-        for (let object of objects){
+        for (let object of objects) {
             const passenger = `${object.toNBT()},`;
             // If command is too large, break it up into a new command
-            if ((passengers[counter]+passenger).length > 32000){
+            if ((passengers[counter] + passenger).length > 32000) {
                 counter++;
                 passengers[counter] = '';
             }
             passengers[counter] += `${object.toNBT()},`;
         }
 
-        for (let passenger of passengers){
+        for (let passenger of passengers) {
             passenger = passenger.slice(0, -1);
             const command = `/summon block_display ~-0.5 ~-0.5 ~-0.5 {Passengers:[${passenger}]}`;
             commands.push(command);
         }
-        
-        
+
+
         return commands;
     }
 
@@ -244,7 +256,7 @@ class Editor {
         input.type = 'file';
 
         input.onchange = e => {
-            
+
             // getting a hold of the file reference
             var file = e.target.files[0];
 
@@ -252,21 +264,21 @@ class Editor {
             var reader = new FileReader();
             reader.readAsText(file, 'UTF-8');
 
-            
+
             // here we tell the reader what to do when it's done reading...
             reader.onload = async readerEvent => {
                 var content = readerEvent.target.result; // this is the content!
                 try {
-                let json = await decompressJSON(content);
-                scope.gui.loading.show(`Loading ${JSON.parse(json)[0].name}`);
-                let objects = await scope.objectsFromJSON(json);
-                
-                scope.scene.remove(scope.objects);
-                scope.objects = objects[0];
-                scope.scene.add(scope.objects);
+                    let json = await decompressJSON(content);
+                    scope.gui.loading.show(`Loading ${JSON.parse(json)[0].name}`);
+                    let objects = await scope.objectsFromJSON(json);
 
-                scope.update()
-                scope.gui.loading.hide();
+                    scope.scene.remove(scope.objects);
+                    scope.objects = objects[0];
+                    scope.scene.add(scope.objects);
+
+                    scope.update()
+                    scope.gui.loading.hide();
                 } catch (error) {
                     alert('File is not a valid a .bdstudio file!');
                     scope.gui.loading.hide();
@@ -279,7 +291,7 @@ class Editor {
         input.click();
     }
 
-    objectsToJSON(objects, keepUUID=false) {
+    objectsToJSON(objects, keepUUID = false) {
         let list = [];
         for (let child of objects) {
             if (child.isBlockDisplay || child.isCollection) {
@@ -289,7 +301,7 @@ class Editor {
         return JSON.stringify(list);
     }
 
-    async objectsFromJSON(string, keepUUID=false) {
+    async objectsFromJSON(string, keepUUID = false) {
         let scope = this;
         const data = JSON.parse(string);
         let list = [];
@@ -304,11 +316,11 @@ class Editor {
             list.push(object);
         }
 
-        
+
         return list;
     }
 
-    
+
 }
 
 export { Editor };

@@ -8,6 +8,7 @@ class Collection extends Selectable {
         super(editor);
         this.isCollection = true;
         this.nbt = '';
+        this.nbtInheritance = true;
     }
 
     addElements(objects) {

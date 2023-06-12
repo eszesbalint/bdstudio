@@ -22,8 +22,9 @@ class PropertiesGUI extends GUI {
         if (!object) object = scope.editor.objects;
 
         if (object.isBlockDisplay) {
+            const blockStateFolder = scope.addFolder('Blockstate');
             for (let key of Object.keys(object._possibleVariants)) {
-                let controller = scope.add(
+                let controller = blockStateFolder.add(
                     object.blockState.variant,
                     key,
                     object._possibleVariants[key]
@@ -40,8 +41,8 @@ class PropertiesGUI extends GUI {
                 });
             }
             let props = {
-                get 'Additional NBT'(){ return object.nbt },
-                set 'Additional NBT'(v){ 
+                get 'additional NBT'(){ return object.nbt },
+                set 'additional NBT'(v){ 
                     let command = new PropertyCommand(scope.editor, object, 'nbt', v);
                     scope.editor.history.push(command);
                     command.execute();
@@ -49,28 +50,42 @@ class PropertiesGUI extends GUI {
                     return object.nbt;
                 }
             };
-            let nbtController = scope.add(props, 'Additional NBT').listen();
+            const nbtFolder = scope.addFolder('NBT');
+            nbtFolder.add(props, 'additional NBT').listen();
+
         } else if (object.isCollection) {
             let props = {
-                get 'Name'(){ return object.name },
-                set 'Name'(v){ 
+                get 'name'(){ return object.name },
+                set 'name'(v){ 
                     let command = new PropertyCommand(scope.editor, object, 'name', v);
                     scope.editor.history.push(command);
                     command.execute();
                     scope.editor.gui.elements.update();
                     return object.name;
                 },
-                get 'Additional NBT'(){ return object.nbt },
-                set 'Additional NBT'(v){ 
+                get 'additional NBT'(){ return object.nbt },
+                set 'additional NBT'(v){ 
                     let command = new PropertyCommand(scope.editor, object, 'nbt', v);
                     scope.editor.history.push(command);
                     command.execute();
                     scope.editor.gui.elements.update();
                     return object.nbt;
+                },
+                get 'apply to children'(){ return object.nbtInheritance },
+                set 'apply to children'(v){ 
+                    let command = new PropertyCommand(scope.editor, object, 'nbtInheritance', v);
+                    scope.editor.history.push(command);
+                    command.execute();
+                    scope.editor.gui.elements.update();
+                    return object.nbtInheritance;
                 }
             };
-            let nameController = scope.add(props, 'Name').listen();
-            let nbtController = scope.add(props, 'Additional NBT').listen();
+
+            scope.add(props, 'name').listen();
+
+            const folder = scope.addFolder('NBT');
+            folder.add(props, 'additional NBT').listen();
+            //folder.add(props, 'apply to children').listen();
         }
 
     }

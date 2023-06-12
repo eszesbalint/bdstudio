@@ -5,6 +5,13 @@ A 3D editor and command generator for Minecraft block display entities.
 
 [Try it now](https://eszesbalint.github.io/bdstudio)
 
+## Beta 1.1.1 Changes
+- New duplicates and new groups are selected automatically
+- Setting scale to 0 no longer causes NaN values
+- All blocks with rotated elements in them now render porperly (mostly affects plants and rails)
+- Fixed texturing issues of blocks with animated textures
+- Removed unloadable blockstates (chests, signs, banners, skulls... etc)
+
 ## Beta 1.1 Changes
 - Updated for Minecraft 1.20
 - Added Undo / Redo functionality

@@ -45,6 +45,7 @@ class SearchGUI extends GUI {
         const json = await response.json();
         const blockStateList = json['blockstates'];
 
+        let badboyz = [];
         for (let blockState of blockStateList) {
             if ((blockState + ' ').includes(searchTerm)) {
                 
@@ -57,6 +58,7 @@ class SearchGUI extends GUI {
                     }
                 };
                 folderResults.add(propResults, 'add').name(blockState);
+                
             }
         }
 

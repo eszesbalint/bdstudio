@@ -74,9 +74,9 @@ class TransformsGUI extends GUI {
             },
 
         };
-        folderPosition.add(propsPosition, 'X', -1, 1, 1 / 16).listen();
-        folderPosition.add(propsPosition, 'Y', -1, 1, 1 / 16).listen();
-        folderPosition.add(propsPosition, 'Z', -1, 1, 1 / 16).listen();
+        folderPosition.add(propsPosition, 'X').listen();
+        folderPosition.add(propsPosition, 'Y').listen();
+        folderPosition.add(propsPosition, 'Z').listen();
 
         const folderRotation = this.addFolder('Rotation');
         const propsRotation = {
@@ -162,9 +162,9 @@ class TransformsGUI extends GUI {
             },
 
         };
-        folderScale.add(propsScale, 'X', 0, 1, 1 / 16).listen();
-        folderScale.add(propsScale, 'Y', 0, 1, 1 / 16).listen();
-        folderScale.add(propsScale, 'Z', 0, 1, 1 / 16).listen();
+        folderScale.add(propsScale, 'X').min(0.00001).listen();
+        folderScale.add(propsScale, 'Y').min(0.00001).listen();
+        folderScale.add(propsScale, 'Z').min(0.00001).listen();
     }
 
 

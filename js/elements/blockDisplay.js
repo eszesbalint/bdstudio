@@ -85,7 +85,7 @@ class BlockDisplay extends Selectable {
                     const part = json.multipart[i];
                     if ('when' in part) {
                         let d2 = {};
-                        if ('AND' in part.when) { 
+                        if ('AND' in part.when) {
                             for (let condition of part.when['AND']) {
                                 d2 = mergeDictionaries(condition, d2);
                             }
@@ -148,15 +148,15 @@ class BlockDisplay extends Selectable {
             };
 
 
-            
+
         }
         // Remove previously loaded model
         let prevModelGroups = this.getObjectsByProperty('isBlockModel', true);
-        if (prevModelGroups) { 
-            for (let prevModelGroup of prevModelGroups){
+        if (prevModelGroups) {
+            for (let prevModelGroup of prevModelGroups) {
                 prevModelGroup.parent.remove(prevModelGroup);
             }
-            
+
         }
 
         // Add new model
@@ -171,7 +171,7 @@ class BlockDisplay extends Selectable {
             this.selected = !this.selected;
         }
 
-        
+
 
         return this._blockState;
     }
@@ -313,7 +313,7 @@ async function loadModel(modelPath, isFirstRecursionLevel = true) {
         const { from, to, faces } = element;
         const from_vec = new THREE.Vector3(...from).divideScalar(16);
         const to_vec = new THREE.Vector3(...to).divideScalar(16);
-        const center_vec = new THREE.Vector3(0, 0, 0).add(from_vec).add(to_vec).divideScalar(2);
+        const center_vec = new THREE.Vector3().addVectors(from_vec, to_vec).divideScalar(2);
         const size_vec = new THREE.Vector3(0, 0, 0).add(center_vec).sub(from_vec).multiplyScalar(2);
         const [sx, sy, sz] = size_vec.toArray();
 
@@ -394,7 +394,34 @@ async function loadModel(modelPath, isFirstRecursionLevel = true) {
             let texturePath = textureId.replace('minecraft:', '').replace('block/', '');
             //texturePath = 'debug2';
             texturePath = assetsPath + 'textures/block/' + texturePath + '.png';
-            const textureFile = await textureLoader.loadAsync(texturePath);
+
+            // Crop the texture to the first 16x16 pixels
+            const textureImage = new Image();
+            textureImage.src = texturePath;
+            await new Promise((resolve) => {
+                textureImage.onload = resolve;
+            });
+
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 16;
+            canvas.height = 16;
+
+            context.drawImage(
+                textureImage,
+                0,
+                0,
+                16,
+                16,
+                0,
+                0,
+                16,
+                16
+            );
+
+            const croppedTexturePath = canvas.toDataURL();
+
+            const textureFile = await textureLoader.loadAsync(croppedTexturePath);
             textureFile.magFilter = THREE.NearestFilter;
             const material = new THREE.MeshStandardMaterial({
                 map: textureFile,
@@ -421,38 +448,39 @@ async function loadModel(modelPath, isFirstRecursionLevel = true) {
                 origin_vec = new THREE.Vector3(...(element.rotation.origin)).divideScalar(16);
                 rotationGroup.position.set(...(origin_vec.toArray()));
             }
-            switch (element.rotation.axis) {
-                case 'x':
-                    mesh.rotateX(THREE.MathUtils.degToRad(180));
-                    break;
-
-                case 'y':
-                    mesh.rotateY(THREE.MathUtils.degToRad(180));
-                    break;
-
-                case 'z':
-                    mesh.rotateZ(THREE.MathUtils.degToRad(180));
-                    break;
-            }
-            const meshPos = new THREE.Vector3(0, 0, 0).add(origin_vec).sub(center_vec);
+            const meshPos = new THREE.Vector3().subVectors(center_vec, origin_vec);
             mesh.position.set(...(meshPos.toArray()));
             rotationGroup.add(mesh);
-            const angle = THREE.MathUtils.degToRad(element.rotation.angle + 180);
+            const angle = THREE.MathUtils.degToRad(element.rotation.angle);
+  
+            let sX = mesh.scale.x;
+            let sY = mesh.scale.y;
+            let sZ = mesh.scale.z;
+            let sF = Math.max(Math.abs(Math.cos(angle)), Math.abs(Math.sin(angle)));
+
             switch (element.rotation.axis) {
                 case 'x':
-                    
+                    if (element.rotation.rescale) {
+                        mesh.scale.set(sX, sY / sF, sZ / sF);
+                    }
                     rotationGroup.rotateX(angle);
                     break;
 
                 case 'y':
+                    if (element.rotation.rescale) {
+                        mesh.scale.set(sX / sF, sY, sZ / sF);
+                    }
                     rotationGroup.rotateY(angle);
                     break;
 
                 case 'z':
-                    
+                    if (element.rotation.rescale) {
+                        mesh.scale.set(sX / sF, sY / sF, sZ);
+                    }
                     rotationGroup.rotateZ(angle);
                     break;
             }
+
         } else {
             rotationGroup.add(mesh);
         }

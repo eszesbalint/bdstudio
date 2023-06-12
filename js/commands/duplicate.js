@@ -15,12 +15,12 @@ class DuplicateCommand extends Command {
 
     async execute() {
         if (this.resultJSON){
-            let objects = await this.editor.objectsFromJSON(this.resultJSON, true);
+            var objects = await this.editor.objectsFromJSON(this.resultJSON, true);
             for (let object of objects) {
                 this.editor.get(this.parentUUID).add(object);
             }
         } else {
-            let objects = await this.editor.objectsFromJSON(this.objectsJSON, false);
+            var objects = await this.editor.objectsFromJSON(this.objectsJSON, false);
             for (let object of objects) {
                 this.editor.get(this.parentUUID).add(object);
             }
@@ -29,7 +29,7 @@ class DuplicateCommand extends Command {
                 true
             );
         }
-
+        return objects;
     }
 
     revert() {
