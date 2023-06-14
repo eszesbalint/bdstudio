@@ -1,5 +1,5 @@
 class LoadingGUI {
-    constructor(editor, parentDom = document.body) {
+    constructor(editor, parentDom = editor.domElement) {
         this.editor = editor;
         this.domElement = document.createElement('div');
         this.domElement.id = 'loading';

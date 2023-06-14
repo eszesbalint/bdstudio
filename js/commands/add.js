@@ -5,9 +5,10 @@ import { Command } from './command.js';
 import { BlockDisplay } from '../elements/blockDisplay.js'
 
 class AddCommand extends Command {
-    constructor(editor, blockStateString) {
+    constructor(editor, blockStateString, parentObject) {
         super(editor);
         this.blockStateString = blockStateString;
+        this.parentUUID = parentObject ? parentObject.uuid : editor.objects.uuid;
         this.resultObjectUUID = undefined;
     }
 
@@ -16,7 +17,7 @@ class AddCommand extends Command {
         blockDisplay.blockState = this.blockStateString;
         await blockDisplay.updateModel();
         
-        this.editor.objects.add(blockDisplay);
+        this.editor.get(this.parentUUID).add(blockDisplay);
 
         if (this.resultObjectUUID) {
             blockDisplay.uuid = this.resultObjectUUID;

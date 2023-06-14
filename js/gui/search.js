@@ -33,7 +33,7 @@ class SearchGUI extends GUI {
         this.update();
     }
 
-    async update(searchTerm='') {
+    async update(searchTerm = '') {
         let scope = this;
         this.folders[0].destroy();
         const folderResults = this.addFolder('Results');
@@ -48,17 +48,35 @@ class SearchGUI extends GUI {
         let badboyz = [];
         for (let blockState of blockStateList) {
             if ((blockState + ' ').includes(searchTerm)) {
-                
+
                 const propResults = {
                     'add': async function () {
+                        let objects = scope.editor.find('selected');
                         
-                        let object = await scope.editor.add(blockState);
-                        object.selected = true;
-                        
+                        if (objects.length) {
+                            let isAllBlockDisplays = objects.every(function (element, index) {
+                                return element.isBlockDisplay;
+                            });
+                            if (isAllBlockDisplays) {
+                                for (let object of objects) {
+                                    object.blockState = blockState;
+                                }
+                                //scope.editor.selectAll(objects);
+                            } else if (objects.length === 1 && objects[0].isCollection) {
+                                let object = await scope.editor.add(blockState, objects[0]);
+                                object.selected = true;
+                            } else {
+                                let object = await scope.editor.add(blockState);
+                                object.selected = true;
+                            }
+                        } else {
+                            let object = await scope.editor.add(blockState);
+                            object.selected = true;
+                        }
                     }
                 };
                 folderResults.add(propResults, 'add').name(blockState);
-                
+
             }
         }
 

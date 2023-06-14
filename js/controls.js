@@ -234,12 +234,17 @@ class Controls {
 
 
         editor.renderer.domElement.addEventListener('mouseup', function (event) {
+            let canvas = editor.renderer.domElement;
+            let rect = canvas.getBoundingClientRect();
+
             let prevMouse = mouse;
             mouse = [event.clientX, event.clientY];
             if (!arrayEquals(prevMouse, mouse)) return;
 
-            let mouseVector = new THREE.Vector2((event.clientX / window.innerWidth) * 2 - 1,
-                -(event.clientY / window.innerHeight) * 2 + 1);
+            let mouseVector = new THREE.Vector2(
+                 ((event.clientX - rect.left) / canvas.width) * 2 - 1,
+                -((event.clientY - rect.top) / canvas.height) * 2 + 1
+                );
 
             var raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(mouseVector, editor.currentCamera);
@@ -249,7 +254,7 @@ class Controls {
                 if (object.isBoundingBox) {
                     continue;
                 } else {
-                    while (object.parent && !object.isBlockDisplay) {
+                    while (object.parent && !(object.parent === editor.objects) && !(object.parent.selected && object.parent.isCollection)) {
                         object = object.parent;
                     }
                     object.selected = true;
@@ -264,7 +269,10 @@ class Controls {
         });
 
         window.addEventListener('resize', function (event) {
-            const aspect = window.innerWidth / window.innerHeight;
+            //let canvas = editor.renderer.domElement;
+            //canvas.width = editor.domElement.clientWidth;
+            //canvas.height = editor.domElement.clientHeight;
+            const aspect = editor.domElement.clientWidth / editor.domElement.clientHeight;
 
             editor.cameraPersp.aspect = aspect;
             editor.cameraPersp.updateProjectionMatrix();
@@ -273,7 +281,7 @@ class Controls {
             editor.cameraOrtho.right = editor.cameraOrtho.top * aspect;
             editor.cameraOrtho.updateProjectionMatrix();
 
-            editor.renderer.setSize(window.innerWidth, window.innerHeight);
+            editor.renderer.setSize(editor.domElement.clientWidth, editor.domElement.clientHeight);
 
             editor.render();
         });

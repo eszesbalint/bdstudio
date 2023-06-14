@@ -63,7 +63,7 @@ class BlockDisplay extends Selectable {
                     x = x ? x : 0;
                     y = y ? y : 0;
                     z = z ? z : 0;
-                    rotation = [x, y, z];
+                    rotation = { 'x': x, 'y': y, 'z': z };
 
                 } else {
                     let { model, x, y, z } = json.variants[best_match];
@@ -71,13 +71,16 @@ class BlockDisplay extends Selectable {
                     x = x ? x : 0;
                     y = y ? y : 0;
                     z = z ? z : 0;
-                    rotation = [x, y, z];
+                    rotation = { 'x': x, 'y': y, 'z': z };
                 }
 
 
                 correctedVariant = parseVariantString(best_match);
                 blockModelGroup = await loadModel(modelId);
-                blockModelGroup = rotateBlockModelGroup(blockModelGroup, rotation);
+                for (let axis of Object.keys(rotation)) {
+                    blockModelGroup = rotateBlockModelGroup(blockModelGroup, axis, rotation[axis]);
+                }
+
 
             } else if ('multipart' in json) {
                 const models = [];
@@ -129,9 +132,12 @@ class BlockDisplay extends Selectable {
                     x = x ? x : 0;
                     y = y ? y : 0;
                     z = z ? z : 0;
-                    let rotation = [x, y, z];
+                    let rotation = { 'x': x, 'y': y, 'z': z };
                     let blockModelPartGroup = await loadModel(modelId);
-                    blockModelPartGroup = rotateBlockModelGroup(blockModelPartGroup, rotation);
+                    for (let axis of Object.keys(rotation)) {
+                        blockModelPartGroup = rotateBlockModelGroup(blockModelPartGroup, axis, rotation[axis]);
+                    }
+
                     blockModelGroup.add(blockModelPartGroup);
                 }
             } else {
@@ -171,7 +177,7 @@ class BlockDisplay extends Selectable {
             this.selected = !this.selected;
         }
 
-
+        this.editor.update();
 
         return this._blockState;
     }
@@ -452,7 +458,7 @@ async function loadModel(modelPath, isFirstRecursionLevel = true) {
             mesh.position.set(...(meshPos.toArray()));
             rotationGroup.add(mesh);
             const angle = THREE.MathUtils.degToRad(element.rotation.angle);
-  
+
             let sX = mesh.scale.x;
             let sY = mesh.scale.y;
             let sZ = mesh.scale.z;
@@ -510,36 +516,31 @@ function getVertexIndicesForFace(faceName) {
     }
 }
 
-function rotateBlockModelGroup(blockModelGroup, rotation = [0, 0, 0]) {
+function rotateBlockModelGroup(blockModelGroup, axis, deg) {
     let newBlockModelGroup = new THREE.Group();
     let rotationGroup = new THREE.Group();
-
     let origin_vec = new THREE.Vector3(-0.5, -0.5, -0.5);
-
-    //    switch (element.rotation.axis) {
-    //        case 'x':
-    //            mesh.rotateX(THREE.MathUtils.degToRad(180));
-    //            break;
-    //
-    //        case 'y':
-    //            mesh.rotateY(THREE.MathUtils.degToRad(180));
-    //            break;
-    //
-    //        case 'z':
-    //            mesh.rotateZ(THREE.MathUtils.degToRad(180));
-    //            break;
-    //    }
     const meshPos = new THREE.Vector3(0, 0, 0).add(origin_vec);
     blockModelGroup.position.set(...(meshPos.toArray()));
     rotationGroup.add(blockModelGroup);
 
-    rotationGroup.rotateX(THREE.MathUtils.degToRad(rotation[0] - 180));
-    rotationGroup.rotateY(THREE.MathUtils.degToRad(rotation[1] - 180));
-    rotationGroup.rotateZ(THREE.MathUtils.degToRad(rotation[2] - 180));
+    let rad = THREE.MathUtils.degToRad(deg - 180);
+    switch (axis) {
+        case 'x':
+            rotationGroup.rotateX(rad);
+            break;
+
+        case 'y':
+            rotationGroup.rotateY(rad);
+            break;
+
+        case 'z':
+            rotationGroup.rotateZ(rad);
+            break;
+    }
+
 
     rotationGroup.position.set(...(origin_vec.multiplyScalar(-1).toArray()));
-
-
     newBlockModelGroup.add(rotationGroup);
     return newBlockModelGroup;
 }

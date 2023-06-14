@@ -41,9 +41,9 @@ class Editor {
     clipboard = [];
     gui = {};
 
-    constructor() {
+    constructor(domElement) {
 
-
+        this.domElement=domElement;
         new Scene(this);
 
         this.objects = new THREE.Group();
@@ -131,10 +131,10 @@ class Editor {
         this.scene.add(this.objects);
     }
 
-    async add(blockState) {
+    async add(blockState, parent) {
         this.gui.loading.show(`Loading model for ${blockState}`);
         try {
-            var command = new AddCommand(this, blockState);
+            var command = new AddCommand(this, blockState, parent);
             var blockDisplay = await command.execute();
         } catch (error) {
             alert(`Couldn't load ${blockState}!`);
@@ -166,6 +166,7 @@ class Editor {
     }
 
     selectAll(objects) {
+        this.selectNone();
 
         if (!objects) objects = this.objects.children;
 
@@ -184,7 +185,7 @@ class Editor {
 
     selectNone() {
         //this.controls.shiftDown = true;
-        for (let object of this.objects.children) {
+        for (let object of this.find('selected')) {
             object.selected = false;
         }
         //this.controls.shiftDown = false;

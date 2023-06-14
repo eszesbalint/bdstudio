@@ -6,13 +6,15 @@ import { Collection } from './elements/elements.js';
 
 class Scene {
     constructor( editor ) {
-        this.editor = editor;
-        editor.renderer = new THREE.WebGLRenderer({ antialias: true });
+        let canvas = document.getElementById('canvas');
+        editor.renderer = new THREE.WebGLRenderer({ antialias: true, canvas: canvas });
         editor.renderer.setPixelRatio(window.devicePixelRatio);
-        editor.renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(editor.renderer.domElement);
+        canvas.width = editor.domElement.clientWidth;
+        canvas.height = editor.domElement.clientHeight;
+        editor.renderer.setSize(canvas.width, canvas.height);
+        //document.body.appendChild(editor.renderer.domElement);
 
-        const aspect = window.innerWidth / window.innerHeight;
+        const aspect = canvas.width / canvas.height;
 
         editor.cameraPersp = new THREE.PerspectiveCamera(50, aspect, 0.01, 30000);
         editor.cameraOrtho = new THREE.OrthographicCamera(- 6 * aspect, 6 * aspect, 6, - 6, 0.0001, 30000);
