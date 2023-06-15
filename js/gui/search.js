@@ -1,5 +1,6 @@
 import { GUI } from 'lil-gui';
 
+import { PropertyCommand } from '../commands/property.js';
 import { assetsPath } from '../elements/blockDisplay.js';
 
 class SearchGUI extends GUI {
@@ -52,14 +53,23 @@ class SearchGUI extends GUI {
                 const propResults = {
                     'add': async function () {
                         let objects = scope.editor.find('selected');
-                        
+
                         if (objects.length) {
                             let isAllBlockDisplays = objects.every(function (element, index) {
                                 return element.isBlockDisplay;
                             });
                             if (isAllBlockDisplays) {
                                 for (let object of objects) {
+                                    const before = JSON.parse(JSON.stringify(object.blockState));
                                     object.blockState = blockState;
+                                    const after = JSON.parse(JSON.stringify(object.blockState));
+                                    let command = new PropertyCommand(scope.editor, object, 'blockState', after);
+                                    command.beforeValue = before;
+                                    scope.editor.history.push(command);
+
+                                    //await object.updateModel();
+                                    //scope.editor.gui.elements.update();
+                                    
                                 }
                                 //scope.editor.selectAll(objects);
                             } else if (objects.length === 1 && objects[0].isCollection) {

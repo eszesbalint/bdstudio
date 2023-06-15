@@ -5,6 +5,10 @@ A 3D editor and command generator for Minecraft block display entities.
 
 [Try it now](https://eszesbalint.github.io/bdstudio)
 
+## Beta 1.1.2 Changes
+- Added replace functionality. Clicking on a blockstate in block search now will replace the selected block display, or add a new block display if a collection is selected.
+- Selecting an object in the 3D viewport now will succesively traverse the project tree. So for example if you click on a block display that is inside a collection, first click will select the collection, second click will select the block display itself. 
+
 ## Beta 1.1.1 Changes
 - New duplicates and new groups are selected automatically
 - Setting scale to 0 no longer causes NaN values
