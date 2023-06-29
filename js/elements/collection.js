@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 
 import { Selectable } from './selectable.js';
-import { BlockDisplay } from './blockDisplay.js';
+import { BlockDisplay } from './BlockDisplay.js';
+import { ItemDisplay } from './ItemDisplay.js';
 
 class Collection extends Selectable {
     constructor(editor) {
@@ -48,7 +49,7 @@ class Collection extends Selectable {
         this.updateMatrix();
         let objectList = [];
         for (let object of [...this.children]) {
-            if (object.isBlockDisplay || object.isCollection) {
+            if (object.isDisplay || object.isCollection) {
                 object.updateMatrix();
                 this.remove(object);
                 object.applyMatrix4(this.matrix);
@@ -64,11 +65,12 @@ class Collection extends Selectable {
     toDict(keepUUID=false) {
         let list = [];
         for (let child of this.children) {
-            if (child.isBlockDisplay || child.isCollection) {
+            if (child.isDisplay || child.isCollection) {
                 list.push(child.toDict(keepUUID));
             }
         }
         let dict = {
+            isCollection: true,
             name: this.name,
             nbt: this.nbt,
             transforms: this.matrix.clone().transpose().toArray(),
@@ -82,12 +84,17 @@ class Collection extends Selectable {
         let { name, transforms, nbt, children, uuid } = dict;
         let objectList = [];
         for (let child of children) {
-            
-            if (child.children) {
-                objectList.push(await Collection.fromDict(editor, child, keepUUID));
+            let object;
+            if (child.children || child.isCollection) {
+                object = await Collection.fromDict(editor, child, keepUUID);
+            } else if (child.isBlockDisplay) {
+                object = await BlockDisplay.fromDict(editor, child, keepUUID);
+            } else if (child.isItemDisplay) {
+                object = await ItemDisplay.fromDict(editor, child, keepUUID);
             } else {
-                objectList.push(await BlockDisplay.fromDict(editor, child, keepUUID));
+                object = await BlockDisplay.fromDict(editor, child, keepUUID);
             }
+            objectList.push(object);
         }
 
         const newGroup = new Collection(editor).addElements(objectList);

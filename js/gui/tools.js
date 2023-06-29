@@ -1,10 +1,14 @@
-import { GUI } from 'lil-gui';
+import { GUI } from './guiClass.js';
 
-class ToolsGUI extends GUI {
-    constructor(editor, functions, parentDom = document.getElementById('tool_container')) {
-        super({ autoPlace: false, title: '' });
-        this.domElement.id = 'toolsGUI';
-        this.parentDom = parentDom;
+export class ToolsGUI extends GUI {
+    constructor(editor, functions, args, vertical=false) {
+        super(editor, args);
+        this.domElement.classList.add('toolsGUI');
+        if (vertical) {
+            this.domElement.classList.add('vertical');
+        } else {
+            this.domElement.classList.add('horizontal');
+        }
         this.editor = editor;
         this.parentDom.appendChild(this.domElement);
 
@@ -21,25 +25,25 @@ class ToolsGUI extends GUI {
             }
             let button = this.add(obj, 'function');            
             button.domElement.title = fun['tooltip'];
-            button.domElement.getElementsByClassName('name')[0].innerHTML = `<i class="bi bi-${fun['icon']}"></i>`;
+            
+
+                button.domElement.getElementsByClassName('name')[0].innerHTML = `
+                <i class="bi bi-${fun['icon']}">
+                    ${fun['secondary_icon']?`<i class="bi bi-${fun['secondary_icon']} secondary"></i>`:''}
+                </i>
+                ${fun['title']?`<span>${fun['title']}</span>`:''}
+                `;
+
             button.domElement.getElementsByClassName('bi')[0].style.color = fun['color'] ? fun['color'] : 'inherit';
         }
     }
 }
 
-class FileToolsGUI extends ToolsGUI {
-    constructor(editor, parentDom = document.getElementById('tool_container')) {
+export class FileToolsGUI extends ToolsGUI {
+    constructor(editor, args, vertical=false) {
         let functions = [
             {
-                'tooltip': 'New Project',
-                'icon': 'file-earmark-plus',
-                'function': function () { 
-                    editor.control.detach(); 
-                    editor.new(); 
-                    editor.update();
-                 },
-            },
-            {
+                'title': 'Load',
                 'tooltip': 'Load',
                 'icon': 'folder2-open',
                 'function': async function () {
@@ -48,17 +52,29 @@ class FileToolsGUI extends ToolsGUI {
                 },
             },
             {
+                'title': 'Save',
                 'tooltip': 'Save',
                 'icon': 'save',
                 'function': function () { editor.saveBlockDisplaysToFile() },
             },
+            {
+                'title': 'New',
+                'tooltip': 'New Project',
+                'icon': 'file-earmark-fill',
+                'secondary_icon': 'plus-circle-fill',
+                'function': function () { 
+                    editor.control.detach(); 
+                    editor.new(); 
+                    editor.update();
+                 },
+            },
         ];
-        super(editor, functions, parentDom);
+        super(editor, functions, args, vertical);
     }
 }
 
-class HistoryToolsGUI extends ToolsGUI {
-    constructor(editor, parentDom = document.getElementById('tool_container')) {
+export class HistoryToolsGUI extends ToolsGUI {
+    constructor(editor, parentDom) {
         let functions = [
             {
                 'tooltip': 'Undo',
@@ -75,15 +91,25 @@ class HistoryToolsGUI extends ToolsGUI {
     }
 }
 
-class ElementToolsGUI extends ToolsGUI {
-    constructor(editor, parentDom = document.getElementById('tool_container')) {
+export class ElementToolsGUI extends ToolsGUI {
+    constructor(editor, args, vertical=false) {
         let functions = [
             {
+                'title': 'Blocks',
                 'tooltip': 'Add Block Display',
-                'icon': 'plus-square-fill',
-                'function': function () { editor.gui.search.open() },
+                'icon': 'box-fill',
+                'secondary_icon': 'search',
+                'function': function () { editor.gui.blockSearch.showModal() },
             },
             {
+                'title': 'Items',
+                'tooltip': 'Add Item Display',
+                'icon': 'gem',
+                'secondary_icon': 'search',
+                'function': function () { editor.gui.itemSearch.showModal() },
+            },
+            {   
+                'title': 'Duplicate',
                 'tooltip': 'Duplicate Selected',
                 'icon': 'intersect',
                 'function': async function () {
@@ -93,14 +119,16 @@ class ElementToolsGUI extends ToolsGUI {
                 },
             },
             {
+                'title': 'Group',
                 'tooltip': 'Group / Ungroup Selected (G)',
-                'icon': 'collection-fill',
+                'icon': 'boxes',
                 'function': function () {
                     editor.group();
                     editor.update();
                 },
             },
             {
+                'title': 'Delete',
                 'tooltip': 'Delete Selected (DEL)',
                 'icon': 'trash-fill',
                 'function': function () {
@@ -109,12 +137,12 @@ class ElementToolsGUI extends ToolsGUI {
                 },
             },
         ];
-        super(editor, functions, parentDom);
+        super(editor, functions, args, vertical);
     }
 }
 
-class TransformToolsGUI extends ToolsGUI {
-    constructor(editor, parentDom = document.getElementById('tool_container')) {
+export class TransformToolsGUI extends ToolsGUI {
+    constructor(editor, args, vertical=false) {
         let functions = [
             {
                 'tooltip': 'Translate Tool (T)',
@@ -132,12 +160,12 @@ class TransformToolsGUI extends ToolsGUI {
                 'function': function () { editor.control.setMode('scale'); },
             },
         ];
-        super(editor, functions, parentDom);
+        super(editor, functions, args, vertical);
     }
 }
 
-class FlipToolsGUI extends ToolsGUI {
-    constructor(editor, parentDom = document.getElementById('tool_container')) {
+export class FlipToolsGUI extends ToolsGUI {
+    constructor(editor, args, vertical=false) {
         let functions = [
             {
                 'tooltip': 'Flip along X',
@@ -179,12 +207,12 @@ class FlipToolsGUI extends ToolsGUI {
                 },
             },
         ];
-        super(editor, functions, parentDom);
+        super(editor, functions, args, vertical);
     }
 }
 
-class MiscGUI extends ToolsGUI {
-    constructor(editor, parentDom = document.getElementById('tool_container')) {
+export class MiscGUI extends ToolsGUI {
+    constructor(editor, args, vertical=true) {
         let functions = [
             {
                 'tooltip': 'Report a bug!',
@@ -193,9 +221,54 @@ class MiscGUI extends ToolsGUI {
                     window.open('https://github.com/eszesbalint/bdstudio/issues', '_blank');
                 },
             },
+            {
+                'tooltip': 'Keyboard Shortcuts',
+                'icon': 'keyboard',
+                'function': function () { 
+                    editor.gui.help.showModal();
+                },
+            },
         ];
-        super(editor, functions, parentDom);
+        super(editor, functions, args, vertical);
     }
 }
 
-export { FileToolsGUI, ElementToolsGUI, TransformToolsGUI, HistoryToolsGUI, FlipToolsGUI, MiscGUI };
+export class ExportToolsGUI extends ToolsGUI {
+    constructor(editor, args, vertical=false) {
+        let functions = [
+            {   
+                'title': 'Generate Command',
+                'tooltip': 'Get Command',
+                'icon': 'file-earmark-code-fill',
+                'color': 'var(--spring-green)',
+                'function': function () { 
+                    editor.gui.command.showModal();
+                },
+            },
+        ];
+        super(editor, functions, args, vertical);
+    }
+}
+
+export class VersionToolsGUI extends ToolsGUI {
+    constructor(editor, args) {
+        let functions = [
+            {
+                'title': 'BDStudio',
+                'tooltip': 'New Project',
+                'icon': 'file-earmark-plus',
+                'function': function () {
+                    editor.gui.version.showModal();
+                },
+            }
+        ];
+        super(editor, functions, args);
+
+        let button = this.controllers[0];
+        button.domElement.getElementsByClassName('name')[0].innerHTML = `
+                <img src="./public/images/logo_28x28.png" width="28" height="28">
+                ${functions[0]['title']?`<span>${functions[0]['title']}</span>`:''}
+                `;
+    }
+}
+

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GUI } from './gui/guiClass.js';
 
 import { Scene } from './scene.js';
 import { Controls } from './controls.js';
@@ -7,9 +8,10 @@ import {
     ElementsGUI,
     PropertiesGUI,
     TransformsGUI,
-    SearchGUI,
+    BlockSearchGUI, ItemSearchGUI,
     CommandGUI,
     HelpGUI,
+    VersionGUI,
     FileToolsGUI,
     ElementToolsGUI,
     TransformToolsGUI,
@@ -17,6 +19,8 @@ import {
     FlipToolsGUI,
     LoadingGUI,
     MiscGUI,
+    VersionToolsGUI,
+    ExportToolsGUI
 } from './gui/gui.js';
 
 import { History } from './history.js';
@@ -29,7 +33,8 @@ import {
     DuplicateCommand,
 } from './commands/commands.js';
 
-import { BlockDisplay, Collection } from './elements/elements.js';
+import { BlockDisplay, ItemDisplay, Collection } from './elements/elements.js';
+import { assetsPath } from './elements/BlockDisplay.js';
 import { compressJSON, decompressJSON } from './utils.js';
 
 let renderer, scene, currentCamera;
@@ -43,7 +48,7 @@ class Editor {
 
     constructor(domElement) {
 
-        this.domElement=domElement;
+        this.domElement = domElement;
         new Scene(this);
 
         this.objects = new THREE.Group();
@@ -65,22 +70,60 @@ class Editor {
     }
 
     initGUI() {
+        const top_tool_strip = document.getElementById('top_tool_strip');
+        const left_tool_strip = document.getElementById('left_tool_strip');
+        const top_container = document.getElementById('top_container');
+        const right_tool_strip = document.getElementById('right_tool_strip');
+        const side_container = document.getElementById('side_container');
+
+        
+        
+
+        let project = new GUI(this,{ autoPlace: false, title: 'Elements', container: side_container });
+        //side_container.appendChild(project.domElement);
+        let elementTools = new ElementToolsGUI(this,{autoplace: false, title: '', parent: project});
+        let elements = new ElementsGUI(this,{autoplace: false, title: 'Elements', parent: project});
+        
+        
+        
+        
+        let properties = new PropertiesGUI(this,{ autoPlace: false, title: 'Properties', container: side_container });
+        let transforms = new TransformsGUI(this,{ autoPlace: false, title: 'Transforms', container: side_container });
+        
+
+        let versionTools = new VersionToolsGUI(this,{autoplace: false, title: '', container: top_tool_strip});
+        let fileTools = new FileToolsGUI(this,{autoplace: false, title: '', container: top_tool_strip});
+        let historyTools = new HistoryToolsGUI(this,{autoplace: false, title: '', container: top_tool_strip});
+        let exportTools = new ExportToolsGUI(this,{autoplace: false, title: '', container: top_tool_strip});
+
+        let blockSearch = new BlockSearchGUI(this,{autoplace: false, title: 'Block search', container: this.domElement});
+        let itemSearch = new ItemSearchGUI(this,{autoplace: false, title: 'Item search', container: this.domElement});
+        let help = new HelpGUI(this,{ autoPlace: false, title: 'Help', container: this.domElement });
+
+        let command = new CommandGUI(this,{autoplace: false, title: 'Command', container: this.domElement});
+        let version = new VersionGUI(this,{autoplace: false, title: 'Welcome to BDStudio!', container: this.domElement});
+
+        let transform = new TransformToolsGUI(this,{autoplace: false, title: '', container: left_tool_strip}, true);
+        let misc = new MiscGUI(this,{autoplace: false, title: '', container: left_tool_strip});
+        let loading = new LoadingGUI(this).show('BDStudio');
+
         this.gui = {
-            elements: new ElementsGUI(this),
-            properties: new PropertiesGUI(this),
-            transforms: new TransformsGUI(this),
-            search: new SearchGUI(this).close(),
-            command: new CommandGUI(this).close(),
-            tools: {
-                file: new FileToolsGUI(this),
-                history: new HistoryToolsGUI(this),
-                element: new ElementToolsGUI(this),
-                transform: new TransformToolsGUI(this),
-                //flip: new FlipToolsGUI(this),
-                misc: new MiscGUI(this),
-            },
-            help: new HelpGUI(this).close(),
-            loading: new LoadingGUI(this).hide(),
+            elementTools: elementTools, 
+            blockSearch: blockSearch,
+            itemSearch: itemSearch,
+            elements: elements,
+            properties: properties,
+            transforms: transforms,
+            help: help,
+            versionTools: versionTools, 
+            fileTools: fileTools, 
+            historyTools: historyTools, 
+            exportTools: exportTools, 
+            misc: misc, 
+            command: command, 
+            version: version,
+            transform: transform, 
+            loading: loading, 
         }
     }
 
@@ -131,20 +174,20 @@ class Editor {
         this.scene.add(this.objects);
     }
 
-    async add(blockState, parent) {
-        this.gui.loading.show(`Loading model for ${blockState}`);
+    async add(identifier, type, parent) {
+        this.gui.loading.show(`Loading model for ${identifier}`);
         try {
-            var command = new AddCommand(this, blockState, parent);
-            var blockDisplay = await command.execute();
+            var command = new AddCommand(this, identifier, type, parent);
+            var display = await command.execute();
         } catch (error) {
-            alert(`Couldn't load ${blockState}!`);
+            alert(`Couldn't load ${identifier}!`);
             this.gui.loading.hide();
             return;
         }
 
         this.history.push(command);
         this.gui.loading.hide();
-        return blockDisplay;
+        return display;
     }
 
     group() {
@@ -214,7 +257,7 @@ class Editor {
     }
 
     generate() {
-        let objects = this.find('isBlockDisplay');
+        let objects = this.find('isDisplay');
         let passengers = [''];
         let counter = 0;
         let commands = [];
@@ -281,6 +324,7 @@ class Editor {
                     scope.update()
                     scope.gui.loading.hide();
                 } catch (error) {
+                    console.log(error);
                     alert('File is not a valid a .bdstudio file!');
                     scope.gui.loading.hide();
                     return;
@@ -295,7 +339,7 @@ class Editor {
     objectsToJSON(objects, keepUUID = false) {
         let list = [];
         for (let child of objects) {
-            if (child.isBlockDisplay || child.isCollection) {
+            if (child.isBlockDisplay || child.isItemDisplay || child.isCollection) {
                 list.push(child.toDict(keepUUID));
             }
         }
@@ -309,8 +353,12 @@ class Editor {
 
         for (let dict of data) {
             let object;
-            if (dict.children) {
+            if (dict.children || dict.isCollection) {
                 object = await Collection.fromDict(scope, dict, keepUUID);
+            } else if (dict.isBlockDisplay) {
+                object = await BlockDisplay.fromDict(scope, dict, keepUUID);
+            } else if (dict.isItemDisplay) {
+                object = await ItemDisplay.fromDict(scope, dict, keepUUID);
             } else {
                 object = await BlockDisplay.fromDict(scope, dict, keepUUID);
             }

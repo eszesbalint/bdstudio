@@ -1,15 +1,17 @@
-import { GUI } from 'lil-gui';
+import { GUI } from './guiClass.js';
+import { DialogGUI } from './dialog.js';
 
 import { PropertyCommand } from '../commands/property.js';
-import { assetsPath } from '../elements/blockDisplay.js';
+import { assetsPath } from '../elements/BlockDisplay.js';
 
-class SearchGUI extends GUI {
-    constructor(editor, parentDom = document.getElementById('top_container')) {
-        super({ autoPlace: false, title: 'Block Search' });
-        this.parentDom = parentDom;
-        this.domElement.id = 'searchGUI';
+class SearchGUI extends DialogGUI {
+    constructor(editor, args, items=[], prop) {
+        super(editor, args);
+        this.domElement.classList.add('searchGUI');
         this.parentDom.appendChild(this.domElement);
-        this.editor = editor;
+
+        this.items = items;
+        this.prop = prop;
 
         let searchGUI = this;
         const propsSearch = {
@@ -36,57 +38,13 @@ class SearchGUI extends GUI {
 
     async update(searchTerm = '') {
         let scope = this;
-        this.folders[0].destroy();
+        scope.folders[0].destroy();
         const folderResults = this.addFolder('Results');
         folderResults.domElement.id = 'searchResults';
 
-
-
-        const response = await fetch(assetsPath + 'blockstates/blockstates.json');
-        const json = await response.json();
-        const blockStateList = json['blockstates'];
-
-        let badboyz = [];
-        for (let blockState of blockStateList) {
-            if ((blockState + ' ').includes(searchTerm)) {
-
-                const propResults = {
-                    'add': async function () {
-                        let objects = scope.editor.find('selected');
-
-                        if (objects.length) {
-                            let isAllBlockDisplays = objects.every(function (element, index) {
-                                return element.isBlockDisplay;
-                            });
-                            if (isAllBlockDisplays) {
-                                for (let object of objects) {
-                                    const before = JSON.parse(JSON.stringify(object.blockState));
-                                    object.blockState = blockState;
-                                    const after = JSON.parse(JSON.stringify(object.blockState));
-                                    let command = new PropertyCommand(scope.editor, object, 'blockState', after);
-                                    command.beforeValue = before;
-                                    scope.editor.history.push(command);
-
-                                    //await object.updateModel();
-                                    //scope.editor.gui.elements.update();
-                                    
-                                }
-                                //scope.editor.selectAll(objects);
-                            } else if (objects.length === 1 && objects[0].isCollection) {
-                                let object = await scope.editor.add(blockState, objects[0]);
-                                object.selected = true;
-                            } else {
-                                let object = await scope.editor.add(blockState);
-                                object.selected = true;
-                            }
-                        } else {
-                            let object = await scope.editor.add(blockState);
-                            object.selected = true;
-                        }
-                    }
-                };
-                folderResults.add(propResults, 'add').name(blockState);
-
+        for (let item of scope.items) {
+            if ((item + ' ').includes(searchTerm)) {
+                folderResults.add({'function':scope.prop['function'].bind(this,item)}, 'function').name(item);
             }
         }
 
@@ -94,4 +52,107 @@ class SearchGUI extends GUI {
     }
 }
 
-export { SearchGUI };
+class BlockSearchGUI extends SearchGUI {
+    constructor(editor, args, items=[]) {
+
+        const prop = {
+            'function': async function (item) {
+                let objects = editor.find('selected');
+
+                if (objects.length) {
+                    let isAllBlockDisplays = objects.every(function (element, index) {
+                        return element.isBlockDisplay;
+                    });
+                    if (isAllBlockDisplays) {
+                        for (let object of objects) {
+                            const before = JSON.parse(JSON.stringify(object.blockState));
+                            object.blockState = item;
+                            const after = JSON.parse(JSON.stringify(object.blockState));
+                            let command = new PropertyCommand(editor, object, 'blockState', after);
+                            command.beforeValue = before;
+                            editor.history.push(command);
+
+                            //await object.updateModel();
+                            //scope.editor.gui.elements.update();
+                            
+                        }
+                        //scope.editor.selectAll(objects);
+                    } else if (objects.length === 1 && objects[0].isCollection) {
+                        let object = await editor.add(item, 'BlockDisplay', objects[0]);
+                        object.selected = true;
+                    } else {
+                        let object = await editor.add(item, 'BlockDisplay');
+                        object.selected = true;
+                    }
+                } else {
+                    let object = await editor.add(item, 'BlockDisplay');
+                    object.selected = true;
+                }
+            }
+        };
+
+        super(editor, args, items, prop);
+        this.updateItems();
+    }
+
+    async updateItems(){
+        let response = await fetch(assetsPath + 'blockstates.json');
+        let json = await response.json();
+        this.items = json['blockstates'];
+        this.update();
+    }
+}
+
+
+class ItemSearchGUI extends SearchGUI {
+    constructor(editor, args, items=[]) {
+        
+        const prop = {
+            'function': async function (item) {
+                let objects = editor.find('selected');
+
+                if (objects.length) {
+                    let isAllItemDisplays = objects.every(function (element, index) {
+                        return element.isItemDisplay;
+                    });
+                    if (isAllItemDisplays) {
+                        for (let object of objects) {
+                            const before = JSON.parse(JSON.stringify(object._itemState));
+                            object.itemState = item;
+                            const after = JSON.parse(JSON.stringify(object._itemState));
+                            let command = new PropertyCommand(editor, object, 'itemState', after);
+                            command.beforeValue = before;
+                            editor.history.push(command);
+
+                            //await object.updateModel();
+                            //scope.editor.gui.elements.update();
+                            
+                        }
+                        //scope.editor.selectAll(objects);
+                    } else if (objects.length === 1 && objects[0].isCollection) {
+                        let object = await editor.add(item, 'ItemDisplay', objects[0]);
+                        object.selected = true;
+                    } else {
+                        let object = await editor.add(item, 'ItemDisplay');
+                        object.selected = true;
+                    }
+                } else {
+                    let object = await editor.add(item, 'ItemDisplay');
+                    object.selected = true;
+                }
+            }
+        };
+
+        super(editor, args, items, prop);
+        this.updateItems();
+    }
+
+    async updateItems(){
+        let response = await fetch(assetsPath + 'items.json');
+        let json = await response.json();
+        this.items = json['items'];
+        this.update();
+    }
+}
+
+export { BlockSearchGUI, ItemSearchGUI };

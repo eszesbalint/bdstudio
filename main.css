@@ -3,21 +3,54 @@
 :root {
     --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     --font-family-mono: Menlo, Monaco, Consolas, "Droid Sans Mono", monospace;
+
+    --neon-blue: #2e5fffff;
+    --picton-blue: #34b7feff;
+    --spring-green: #3dff71ff;
+    --sunglow: #ffd147ff;
+    --pumpkin: #ff751aff;
+    --rose: #ff297eff;
+
+    --margin: 18px;
 }
 
-html,body {
-    height:100%;
+html,
+body {
+    height: 100%;
 }
 
 body {
     margin: 0;
 }
 
+/* ===== Scrollbar CSS ===== */
+  /* Firefox */
+  #editor * {
+    scrollbar-width: auto;
+    scrollbar-color: #ffffff80 #00000000;
+  }
+
+  /* Chrome, Edge, and Safari */
+  #editor *::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  #editor *::-webkit-scrollbar-track {
+    background: #00000000;
+  }
+
+  #editor *::-webkit-scrollbar-thumb {
+    background-color: #ffffff80;
+    border-radius: 10px;
+    border: 3px solid #00000000;
+  }
+
 #editor {
     position: relative;
     width: 100%;
     height: 100%;
     overflow: hidden;
+
 }
 
 #canvas {
@@ -30,14 +63,18 @@ body {
     --font-size: 9pt;
     --input-font-size: 9pt;
     --background-color: #000000;
-	--text-color: #ababab;
-	--title-background-color: #0d0d0d;
-	--title-text-color: #d9d9d9;
-	--widget-color: #0d0d0d;
-	--hover-color: #212121;
-	--focus-color: #292929;
-	--number-color: #fa0000;
-	--string-color: #2af868;
+    --text-color: #ababab;
+    --title-background-color: #0d0d0d;
+    --title-text-color: #d9d9d9;
+    --widget-color: #0d0d0d;
+    --hover-color: #212121;
+    --focus-color: #292929;
+    --number-color: var(--rose);
+    --string-color: var(--spring-green);
+    border-radius: 4pt;
+}
+
+.lil-gui>.title {
     border-radius: 4pt;
 }
 
@@ -46,10 +83,32 @@ body {
     display: none;
 }
 
-#side_container,
-#tool_container,
-#top_container {
+#GUI {
+    display: flex;
     position: absolute;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#GUI>:nth-child(1) {
+    flex-grow: 3;
+    min-height: 600px;
+}
+
+#GUI>:nth-child(2) {
+    display: flex;
+    flex-direction: row;
+    padding-right: var(--margin);
+}
+
+
+#side_container,
+#left_tool_strip,
+#right_tool_strip,
+#top_container {
+    position: static;
     width: fit-content;
     max-height: 100%;
     top: 0px;
@@ -60,44 +119,47 @@ body {
     overflow: auto;
     align-content: flex-start;
     z-index: 1;
-    pointer-events: none;
-    
 }
 
 #side_container {
     pointer-events: all;
     right: 15px;
     height: 100%;
-    width: calc(245px + 18px);
+    min-width: fit-content;
+    
     flex-wrap: nowrap;
     overflow-y: scroll;
+
+    scrollbar-width: none;
 }
 
 #side_container::-webkit-scrollbar {
     display: none;
 }
 
-#tool_container {
+#left_tool_strip {
     left: 0px;
 }
 
 
 
 #side_container>*,
-#tool_container>*,
-#top_container>* {
+#left_tool_strip>*,
+#right_tool_strip>*,
+#top_container>*,
+#top_tool_strip>* {
     flex-shrink: 0;
-    margin-left: 18px;
-    margin-top: 18px;
+    margin-left: var(--margin);
+    margin-top: var(--margin);
     display: flex;
     /*flex-direction: column;*/
     pointer-events: all;
-    
+
 }
 
 #top_container {
     left: calc(2.6rem + 18px);
-    width: calc(100% - (2*18px + 245px) - (2.6rem + 18px));
+    /*width: calc(100% - (2*18px + 245px) - (2.6rem + 18px)*2);*/
     flex-direction: row;
     overflow: hidden;
 }
@@ -107,34 +169,92 @@ body {
 }
 
 
-#toolsGUI.lil-gui {
-    width: 2.6rem;
+
+
+
+
+#top_tool_strip {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.toolsGUI {
+    display: flex;
     --padding: 0.3rem;
-    --font-size: 1.5rem;
+    
     --widget-height: 2rem;
     --spacing: 0.3rem;
 }
 
-#toolsGUI.lil-gui .title {
+.toolsGUI .title {
     display: none;
 }
 
-#searchGUI {
+.toolsGUI .children {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.toolsGUI.vertical {
+    width: 2.6rem;
+    
+}
+
+.toolsGUI.horizontal {
+    width: fit-content;
+    min-height: 2.6rem;
+    height: fit-content;
+}
+
+.toolsGUI.horizontal .children {
+    display: flex;
+    flex-direction: row;
+}
+
+.toolsGUI .children .controller {
+    min-width: 2.6rem;
+    min-height: 2.6rem;
+    --font-size: 1.5rem;
+    margin: 0;
+}
+
+.toolsGUI .children .controller .name {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.toolsGUI .children .controller span {
+    font-weight: bold;
+    font-size: 0.5em;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+.searchGUI {
     --name-width: 40px;
 }
 
-#searchResults .children {
+.searchGUI .lil-gui {
     max-height: 512px;
     overflow-y: scroll;
 }
 
-#commandGUI {
-    min-width: var(--width);
-    flex-grow: 3;
-    --name-width: 40px;
+.searchGUI .controller.function .widget .name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-#commandGUI textarea {
+.commandGUI {
+    min-width: var(--width);
+    --name-width: 40px;
+    --width: 512px;
+}
+
+.commandGUI textarea {
     box-sizing: border-box;
     max-width: 100%;
     min-width: 100%;
@@ -151,11 +271,19 @@ body {
     margin: var(--spacing) 0;
 }
 
-#elementsGUI.lil-gui .lil-gui .children {
+.elementsGUI>.title {
+    display: none;
+}
+
+.elementsGUI .lil-gui {
+    --background-color: var(--widget-color);
+}
+
+.elementsGUI.lil-gui .lil-gui .children {
     margin-left: 16px;
 }
 
-#elementsGUI > .children {
+.elementsGUI>.children {
     max-height: 512px;
     overflow-y: scroll;
 }
@@ -166,22 +294,26 @@ body {
     text-overflow: ellipsis;
 }
 
-.selected > .title {
-    color: yellow;
+.selected.blockdisplay>.title {
+    color: var(--sunglow);
 }
 
-.selected.collection > .title {
-    color: green;
+.selected.itemdisplay>.title {
+    color: var(--neon-blue);
 }
 
-#loading {
+.selected.collection>.title {
+    color: var(--spring-green);
+}
+
+#loading, .dialog {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.26);
-    backdrop-filter: blur(5px);
+    background-color: rgba(255, 255, 255, 0.068);
+    backdrop-filter: blur(10px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -192,22 +324,38 @@ body {
 .custom-loader {
     width: 40px;
     height: 40px;
-    color:#FFFFFF;
+    color: #FFFFFF;
     background:
-      linear-gradient(currentColor 0 0),
-      linear-gradient(currentColor 0 0),
-      linear-gradient(currentColor 0 0),
-      linear-gradient(currentColor 0 0);
+        linear-gradient(currentColor 0 0),
+        linear-gradient(currentColor 0 0),
+        linear-gradient(currentColor 0 0),
+        linear-gradient(currentColor 0 0);
     background-size: 21px 21px;
-    background-repeat:no-repeat;
+    background-repeat: no-repeat;
     border-radius: 4pt;
-    animation: sh5 1.5s infinite cubic-bezier(0.3,1,0,1);
+    animation: sh5 1.5s infinite cubic-bezier(0.3, 1, 0, 1);
 }
+
 @keyframes sh5 {
-   0%   {background-position: 0    0,100% 0   ,100% 100%,0 100%}
-   33%  {background-position: 0    0,100% 0   ,100% 100%,0 100%;width:60px;height: 60px}
-   66%  {background-position: 100% 0,100% 100%,0    100%,0 0   ;width:60px;height: 60px}
-   100% {background-position: 100% 0,100% 100%,0    100%,0 0   }
+    0% {
+        background-position: 0 0, 100% 0, 100% 100%, 0 100%
+    }
+
+    33% {
+        background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+        width: 60px;
+        height: 60px
+    }
+
+    66% {
+        background-position: 100% 0, 100% 100%, 0 100%, 0 0;
+        width: 60px;
+        height: 60px
+    }
+
+    100% {
+        background-position: 100% 0, 100% 100%, 0 100%, 0 0
+    }
 }
 
 #loading span {
@@ -215,3 +363,104 @@ body {
     font-family: var(--font-family);
     color: white;
 }
+
+
+
+.bi.secondary {
+    position: absolute;
+    font-size: 0.6em;
+    left: 1.1em;
+    top: 0.6em;
+    text-shadow:
+    -1px -1px 0 #000,
+     0   -1px 0 #000,
+     1px -1px 0 #000,
+     1px  0   0 #000,
+     1px  1px 0 #000,
+     0    1px 0 #000,
+    -1px  1px 0 #000,
+    -1px  0   0 #000;
+}
+
+.dialog {
+    margin: 0;
+    padding: 0;
+}
+
+.dialog.hidden {
+    display: none;
+}
+
+.dialog .lil-gui {
+    --width: min(100%, 512px);
+    flex-grow: 0;
+    
+}
+
+.dialog .lil-gui>.title {
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+}
+
+.dialog .lil-gui>.title::before {
+    content: '';
+}
+
+.dialog .lil-gui>.title>span {
+    flex-grow: 3;
+
+}
+
+.titleCard {
+    display: flex;
+    flex-direction: row;
+}
+
+.titleCard > * {
+    padding: var(--margin);
+}
+
+.titleCard .logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle, rgba(64,37,209,1) 0%, rgba(0,0,0,1) 100%);
+}
+
+.titleCard .description {
+    flex-grow: 2;
+    line-height: 1.5;
+}
+
+.titleCard .description > * {
+    margin-bottom: var(--margin);
+}
+
+.titleCard .description a{
+    color: var(--spring-green);
+}
+
+@media only screen and (max-width: 600px) {
+    :root {
+      --margin: 4px;
+    }
+
+    #GUI {
+        flex-direction: column;
+    }
+
+    #GUI>:nth-child(2) {
+        background-color: black;
+        pointer-events: all;
+        overflow-y: scroll;
+    }
+
+    #side_container {
+        width: 100%;
+    }
+
+    #side_container>* {
+        width: 100%;
+    }
+  }

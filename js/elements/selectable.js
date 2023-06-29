@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 
+import { yellow, green, blue } from '../gui/colors.js';
+
 class Selectable extends THREE.Group {
     constructor(editor) {
         super();
@@ -33,7 +35,11 @@ class Selectable extends THREE.Group {
                 this.editor.gui.transforms.show();
             }
             // Creating bounding box
-            let color = (this.isCollection) ? 0x00ff00 : 0xffff00;
+            let color = undefined;
+            if (this.isBlockDisplay) color = yellow;
+            if (this.isItemDisplay) color = blue;
+            if (this.isCollection) color = green;
+
             let parent = this.parent;
             if (parent) parent.remove(this);
             let matrix = this.matrix.clone();

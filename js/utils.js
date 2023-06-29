@@ -1,4 +1,4 @@
-import { parseStateString } from './elements/blockDisplay.js';
+import { parseStateString } from './elements/BlockDisplay.js';
 
 function minecraftSummonCommandFromObjects(objects) {
     let command = '/summon block_display ~-0.5 ~-0.5 ~-0.5 {Passengers:[';
@@ -136,4 +136,19 @@ function mergeDictionaries(dict1, dict2) {
     return result;
 }
 
-export { minecraftSummonCommandFromObjects, compressJSON, decompressJSON, b64decode, printSceneGraph, arrayEquals, intersectDictionaries, mergeDictionaries }
+function changeTransformControlsColors(control,axis,color){
+    let idx = {'x':0,'y':1,'z':2}[axis];
+    // Translate
+    control.children[0].children[idx].children[0].material.color = color;
+    control.children[0].children[idx].children[1].material.color = color;
+
+    // Rotation
+    control.children[1].children[idx].children[0].material.color = color;
+
+    // Scale
+    control.children[2].children[idx].children[0].material.color = color;
+    control.children[2].children[idx].children[1].material.color = color;
+
+}
+
+export { changeTransformControlsColors, minecraftSummonCommandFromObjects, compressJSON, decompressJSON, b64decode, printSceneGraph, arrayEquals, intersectDictionaries, mergeDictionaries }

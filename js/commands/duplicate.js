@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 import { Command } from './command.js';
 
-import { BlockDisplay } from '../elements/blockDisplay.js'
+import { BlockDisplay } from '../elements/BlockDisplay.js'
 
 class DuplicateCommand extends Command {
     constructor(editor, objects) {

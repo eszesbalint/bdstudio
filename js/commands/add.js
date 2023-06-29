@@ -2,30 +2,43 @@ import * as THREE from 'three';
 
 import { Command } from './command.js';
 
-import { BlockDisplay } from '../elements/blockDisplay.js'
+import { BlockDisplay, ItemDisplay } from '../elements/elements'
 
 class AddCommand extends Command {
-    constructor(editor, blockStateString, parentObject) {
+    constructor(editor, identifier, type, parentObject) {
         super(editor);
-        this.blockStateString = blockStateString;
+        this.identifier = identifier;
+        this.type = type;
         this.parentUUID = parentObject ? parentObject.uuid : editor.objects.uuid;
         this.resultObjectUUID = undefined;
     }
 
     async execute() {
-        let blockDisplay = new BlockDisplay(this.editor);
-        blockDisplay.blockState = this.blockStateString;
-        await blockDisplay.updateModel();
+        let display;
+        switch (this.type) {
+            case 'BlockDisplay':
+                display = new BlockDisplay(this.editor);
+                display.blockState = this.identifier;
+                break;
+
+            case 'ItemDisplay':
+                display = new ItemDisplay(this.editor);
+                display.itemState = this.identifier;
+                break;
+
+        }
         
-        this.editor.get(this.parentUUID).add(blockDisplay);
+        await display.updateModel();
+
+        this.editor.get(this.parentUUID).add(display);
 
         if (this.resultObjectUUID) {
-            blockDisplay.uuid = this.resultObjectUUID;
+            display.uuid = this.resultObjectUUID;
         } else {
-            this.resultObjectUUID = blockDisplay.uuid; 
+            this.resultObjectUUID = display.uuid;
         }
 
-        return blockDisplay;
+        return display;
     }
 
     revert() {

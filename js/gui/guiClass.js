@@ -1,8 +1,9 @@
 import { GUI as lilGUI} from 'lil-gui';
 
 class GUI extends lilGUI {
-    constructor(args) {
+    constructor(editor, args) {
         super(args);
+        this.editor = editor;
     }
 
     empty(){
@@ -17,6 +18,14 @@ class GUI extends lilGUI {
 
         
         
+    }
+
+    get parentDom(){
+        if (this.parent) {
+            return this.parent.domElement
+        } else {
+            return this.domElement.parentElement;
+        }
     }
 }
 

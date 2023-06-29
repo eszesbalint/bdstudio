@@ -4,6 +4,8 @@ import { InfiniteGridHelper } from './addons/InfiniteGridHelper';
 
 import { Collection } from './elements/elements.js';
 
+import { red, green, blue, yellow } from './gui/colors.js';
+
 class Scene {
     constructor( editor ) {
         let canvas = document.getElementById('canvas');
@@ -27,15 +29,23 @@ class Scene {
         editor.scene.background = new THREE.Color(0x111111)
 
         // Adding grid helper
-        const grid = new InfiniteGridHelper(4, 64, new THREE.Color(0.2, 0.2, 0.2));
-        grid.material.alphaTest = 0.5;
-        grid.scale.set(1 / 64, 1 / 64, 1 / 64);
-        grid.position.set(0, -0.001, 0);
-        editor.scene.add(grid);
+        // const grid = new InfiniteGridHelper(4, 64, new THREE.Color(0.2, 0.2, 0.2));
+        // grid.material.alphaTest = 0.5;
+        // grid.scale.set(1 / 64, 1 / 64, 1 / 64);
+        // grid.position.set(0, -0.001, 0);
+        // editor.scene.add(grid);
+        const gridHelper = new THREE.GridHelper( 16*16, 16*16, 0x222222, 0x222222);
+        gridHelper.position.set(0,-0.000001,0);
+        editor.scene.add( gridHelper );
+
 
         // Adding axes helper
-        const axesHelper = new THREE.AxesHelper(50);
-        editor.scene.add(axesHelper);
+        const axesHelper1 = new THREE.AxesHelper(500);
+        axesHelper1.setColors(red, green, blue);
+        const axesHelper2 = new THREE.AxesHelper(-500);
+        axesHelper2.setColors(red, green, blue);
+        editor.scene.add(axesHelper1);
+        editor.scene.add(axesHelper2);
 
         // Adding box helper
         const box = new THREE.Box3();

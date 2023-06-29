@@ -1,10 +1,10 @@
-import { GUI } from 'lil-gui';
+import { GUI } from './guiClass.js';
+import { DialogGUI } from './dialog.js';
 
-class HelpGUI extends GUI {
-    constructor(editor, parentDom = document.getElementById('side_container')) {
-        super({ autoPlace: false, title: 'Controls (Help)' });
-        this.parentDom = parentDom;
-        this.domElement.id = 'helpGUI';
+class HelpGUI extends DialogGUI {
+    constructor(editor, args) {
+        super(editor, args);
+        this.domElement.classList.add('helpGUI');
         this.parentDom.appendChild(this.domElement);
         this.editor = editor;
 

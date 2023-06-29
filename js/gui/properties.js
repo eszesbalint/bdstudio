@@ -3,10 +3,9 @@ import { GUI } from './guiClass';
 import { PropertyCommand } from '../commands/commands';
 
 class PropertiesGUI extends GUI {
-    constructor(editor, parentDom = document.getElementById('side_container')) {
-        super({ autoPlace: false, title: 'Properties' });
-        this.parentDom = parentDom;
-        this.domElement.id = 'propertiesGUI';
+    constructor(editor, args) {
+        super(editor, args);
+        this.domElement.classList.add('propertiesGUI');
         this.parentDom.appendChild(this.domElement);
         this.editor = editor;
         this.update();
@@ -35,8 +34,43 @@ class PropertiesGUI extends GUI {
                     let command = new PropertyCommand(scope.editor, object, 'blockState', after);
                     command.beforeValue = before;
                     scope.editor.history.push(command);
+                    command.execute();
 
-                    await object.updateModel();
+                    //await object.updateModel();
+                    scope.editor.gui.elements.update();
+                });
+            }
+            let props = {
+                get 'additional NBT'(){ return object.nbt },
+                set 'additional NBT'(v){ 
+                    let command = new PropertyCommand(scope.editor, object, 'nbt', v);
+                    scope.editor.history.push(command);
+                    command.execute();
+                    scope.editor.gui.elements.update();
+                    return object.nbt;
+                }
+            };
+            const nbtFolder = scope.addFolder('NBT');
+            nbtFolder.add(props, 'additional NBT').listen();
+
+        } else if (object.isItemDisplay) {
+            const blockStateFolder = scope.addFolder('Display');
+            for (let key of Object.keys(object._possibleVariants)) {
+                let controller = blockStateFolder.add(
+                    object.itemState.variant,
+                    key,
+                    object._possibleVariants[key]
+                );
+                const before = JSON.parse(JSON.stringify(object._itemState));
+                controller.onChange(async function (v) {
+                    console.log(object);
+                    const after = JSON.parse(JSON.stringify(object._itemState));
+                    let command = new PropertyCommand(scope.editor, object, 'itemState', after);
+                    command.beforeValue = before;
+                    scope.editor.history.push(command);
+                    command.execute();
+
+                    //await object.updateModel();
                     scope.editor.gui.elements.update();
                 });
             }

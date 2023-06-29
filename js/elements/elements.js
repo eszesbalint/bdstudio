@@ -1,4 +1,5 @@
-import { BlockDisplay } from "./blockDisplay";
+import { BlockDisplay } from "./BlockDisplay";
+import { ItemDisplay } from "./ItemDisplay";
 import { Collection } from "./collection";
 
-export { BlockDisplay, Collection };
+export { BlockDisplay, ItemDisplay, Collection };

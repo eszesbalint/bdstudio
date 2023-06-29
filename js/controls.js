@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { TransformControls } from 'three/addons/controls/TransformControls.js';
+import { TransformControls } from './addons/TransformControls.js';
 
-import { arrayEquals, compressJSON, decompressJSON } from './utils.js';
+import { arrayEquals, compressJSON, decompressJSON, changeTransformControlsColors,printSceneGraph } from './utils.js';
 
 import { TransformCommand, DuplicateCommand } from './commands/commands.js'
 
@@ -20,6 +20,7 @@ class Controls {
         editor.control.setTranslationSnap(1 / 16);
         editor.control.setRotationSnap(THREE.MathUtils.degToRad(15));
         editor.control.setScaleSnap(1 / 16);
+        
         editor.scene.add(editor.control);
 
         let controls = this;
@@ -193,7 +194,7 @@ class Controls {
                             break;
                     }
 
-                } else if (object.isBlockDisplay) {
+                } else if (object.isBlockDisplay || object.isItemDisplay) {
                     object.scale.set(xA, yA, zA);
                 }
                 object.updateMatrix();
@@ -287,24 +288,8 @@ class Controls {
         });
 
         window.addEventListener("load", async function (e) {
-            try {
-                editor.gui.loading.show('Reloading last session');
-                let json = await decompressJSON(localStorage.getItem('blockDisplayObjects'));
-                let objects = await editor.objectsFromJSON(json);
-                if (objects.length === 0) {
-                    editor.gui.loading.hide();
-                    return;
-                }
-                editor.scene.remove(editor.objects);
-                editor.objects = objects[0];
-                editor.scene.add(editor.objects);
-                editor.update();
-                editor.gui.loading.hide();
-            } catch (error) {
-                alert(`Couldn't load last session!`);
-                editor.gui.loading.hide();
-                return;
-            }
+            editor.gui.loading.hide();
+            editor.gui.version.showModal();
         });
         window.addEventListener("beforeunload", async function (e) {
             localStorage.setItem(

@@ -3,10 +3,10 @@ import { GUI } from './guiClass';
 import { TransformCommand } from '../commands/commands.js';
 
 class TransformsGUI extends GUI {
-    constructor(editor, parentDom = document.getElementById('side_container')) {
-        super({ autoPlace: false, title: 'Transforms' });
-        this.parentDom = parentDom;
-        this.domElement.id = 'transformsGUI';
+    constructor(editor, args) {
+        super(editor, args);
+
+        this.domElement.classList.add('transformsGUI');
         this.parentDom.appendChild(this.domElement);
         this.editor = editor;
 

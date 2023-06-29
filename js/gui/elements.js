@@ -2,10 +2,9 @@ import { GUI } from './guiClass';
 
 
 class ElementsGUI extends GUI {
-    constructor(editor, parentDom = document.getElementById('side_container')) {
-        super({ autoPlace: false, title: 'Elements' });
-        this.parentDom = parentDom;
-        this.domElement.id = 'elementsGUI';
+    constructor(editor, args) {
+        super(editor, args);
+        this.domElement.classList.add('elementsGUI');
         this.parentDom.appendChild(this.domElement);
         this.editor = editor;
         this.update();
@@ -30,6 +29,12 @@ class ElementsGUI extends GUI {
 
                 if (object.selected) {
                     folder.domElement.classList.add('selected');
+                    if (object.isBlockDisplay) {
+                        folder.domElement.classList.add('blockdisplay');
+                    }
+                    if (object.isItemDisplay) {
+                        folder.domElement.classList.add('itemdisplay');
+                    }
                     if (object.isCollection) {
                         folder.domElement.classList.add('collection');
                     }
@@ -44,11 +49,11 @@ class ElementsGUI extends GUI {
 
 
 
-            if (object.isBlockDisplay) {
+            if (object.isDisplay) {
 
             } else if (object.isCollection) {
                 forEachChild(object, function (child) {
-                    if (child.isBlockDisplay || child.isCollection) {
+                    if (child.isBlockDisplay || child.isItemDisplay || child.isCollection) {
                         buildRecursively(folder, child);
                     }
                 });
