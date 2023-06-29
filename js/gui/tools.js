@@ -266,7 +266,7 @@ export class VersionToolsGUI extends ToolsGUI {
 
         let button = this.controllers[0];
         button.domElement.getElementsByClassName('name')[0].innerHTML = `
-                <img src="./public/images/logo_28x28.png" width="28" height="28">
+                <img src="images/logo_28x28.png" width="28" height="28">
                 ${functions[0]['title']?`<span>${functions[0]['title']}</span>`:''}
                 `;
     }
