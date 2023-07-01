@@ -26,18 +26,19 @@ class ElementsGUI extends GUI {
                     object.selected = true;
                 });
 
+                if (object.isBlockDisplay) {
+                    folder.domElement.classList.add('blockdisplay');
+                }
+                if (object.isItemDisplay) {
+                    folder.domElement.classList.add('itemdisplay');
+                }
+                if (object.isCollection) {
+                    folder.domElement.classList.add('collection');
+                }
 
                 if (object.selected) {
                     folder.domElement.classList.add('selected');
-                    if (object.isBlockDisplay) {
-                        folder.domElement.classList.add('blockdisplay');
-                    }
-                    if (object.isItemDisplay) {
-                        folder.domElement.classList.add('itemdisplay');
-                    }
-                    if (object.isCollection) {
-                        folder.domElement.classList.add('collection');
-                    }
+                    
 
                 } else if (object.getObjectByProperty('selected', true)) {
 
@@ -45,6 +46,8 @@ class ElementsGUI extends GUI {
                     folder.domElement.classList.add('closed');
                     return;
                 }
+
+                
             }
 
 

@@ -2,6 +2,8 @@ import * as THREE from 'three';
 
 import { InfiniteGridHelper } from './addons/InfiniteGridHelper';
 
+import { ViewHelper } from './addons/ViewHelper.js';
+
 import { Collection } from './elements/elements.js';
 
 import { red, green, blue, yellow } from './gui/colors.js';
@@ -26,17 +28,23 @@ class Scene {
         editor.currentCamera.lookAt(0, 0, 0);
 
         editor.scene = new THREE.Scene();
-        editor.scene.background = new THREE.Color(0x111111)
+        editor.scene.background = new THREE.Color(0x111111);
+
+         // View helper
+        let viewHelperCanvas = document.getElementById('viewHelper');
+        editor.viewHelperRenderer = new THREE.WebGLRenderer({ antialias: true, canvas: viewHelperCanvas, alpha: true });
+        editor.viewHelper = new ViewHelper( editor.currentCamera, editor.viewHelperRenderer.domElement );
 
         // Adding grid helper
-        // const grid = new InfiniteGridHelper(4, 64, new THREE.Color(0.2, 0.2, 0.2));
-        // grid.material.alphaTest = 0.5;
-        // grid.scale.set(1 / 64, 1 / 64, 1 / 64);
-        // grid.position.set(0, -0.001, 0);
-        // editor.scene.add(grid);
-        const gridHelper = new THREE.GridHelper( 16*16, 16*16, 0x222222, 0x222222);
-        gridHelper.position.set(0,-0.000001,0);
-        editor.scene.add( gridHelper );
+        const grid1 = new InfiniteGridHelper(4, 64, new THREE.Color(0.2, 0.2, 0.2));
+        grid1.renderOrder = -1;
+        grid1.material.alphaTest = 0.9;
+        grid1.scale.set(1 / 64, 1 / 64, 1 / 64);
+        grid1.position.set(0, -0.001, 0);
+        editor.scene.add(grid1);
+        //const gridHelper = new THREE.GridHelper( 16*16, 16*16, 0x222222, 0x222222);
+        //gridHelper.position.set(0,-0.000001,0);
+        //editor.scene.add( gridHelper );
 
 
         // Adding axes helper
@@ -49,7 +57,7 @@ class Scene {
 
         // Adding box helper
         const box = new THREE.Box3();
-        box.setFromCenterAndSize(new THREE.Vector3(0.5, 0.5, 0.5), new THREE.Vector3(0.9999, 0.9999, 0.9999));
+        box.setFromCenterAndSize(new THREE.Vector3(0.5, 0.5, 0.5), new THREE.Vector3(0.999, 0.999, 0.999));
         const helper = new THREE.Box3Helper(box, 0x444444);
         editor.scene.add(helper);
 

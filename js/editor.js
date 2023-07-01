@@ -37,11 +37,12 @@ import { BlockDisplay, ItemDisplay, Collection } from './elements/elements.js';
 import { assetsPath } from './elements/BlockDisplay.js';
 import { compressJSON, decompressJSON } from './utils.js';
 
-let renderer, scene, currentCamera;
+let renderer, scene, currentCamera, viewHelper, viewHelperRenderer;
 
 class Editor {
     scene; renderer; control; orbit;
     cameraPersp; cameraOrtho; currentCamera;
+    viewHelper;
     objects; currentObject;
     clipboard = [];
     gui = {};
@@ -63,6 +64,8 @@ class Editor {
         renderer = this.renderer;
         scene = this.scene;
         currentCamera = this.currentCamera;
+        viewHelper = this.viewHelper;
+        viewHelperRenderer = this.viewHelperRenderer;
 
         this.history = new History(this);
 
@@ -129,6 +132,7 @@ class Editor {
 
     render() {
         renderer.render(scene, currentCamera);
+        viewHelper.render(viewHelperRenderer);
     }
 
     get(uuid) {

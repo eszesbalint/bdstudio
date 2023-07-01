@@ -229,12 +229,12 @@ class Controls {
 
         let mouse;
 
-        editor.renderer.domElement.addEventListener('mousedown', function (event) {
+        editor.renderer.domElement.addEventListener('pointerdown', function (event) {
             mouse = [event.clientX, event.clientY];
         });
 
 
-        editor.renderer.domElement.addEventListener('mouseup', function (event) {
+        editor.renderer.domElement.addEventListener('pointerup', function (event) {
             let canvas = editor.renderer.domElement;
             let rect = canvas.getBoundingClientRect();
 
@@ -243,8 +243,8 @@ class Controls {
             if (!arrayEquals(prevMouse, mouse)) return;
 
             let mouseVector = new THREE.Vector2(
-                 ((event.clientX - rect.left) / canvas.width) * 2 - 1,
-                -((event.clientY - rect.top) / canvas.height) * 2 + 1
+                 ((event.clientX - rect.left) / rect.width) * 2 - 1,
+                -((event.clientY - rect.top) / rect.height) * 2 + 1
                 );
 
             var raycaster = new THREE.Raycaster();

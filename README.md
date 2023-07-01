@@ -34,6 +34,11 @@ The editor provides a user-friendly interface, allowing users to easily manipula
 
 # Changelog
 [Check out my blog on the latest changes](https://eszesbalint.github.io/tags/#update)
+## Beta 1.2.1 Changes
+- Icons in the Elemets list, to easily differentiate between block displays, item displays and collections
+- Pixel grid rendering issues fixed
+- Added camera orientation gizmo in the corner 
+
 ## Beta 1.2 Changes
 - Added support for item displays
 - Redesigned GUI:

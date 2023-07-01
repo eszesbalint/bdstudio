@@ -24,26 +24,26 @@ body {
 }
 
 /* ===== Scrollbar CSS ===== */
-  /* Firefox */
-  #editor * {
+/* Firefox */
+#editor * {
     scrollbar-width: auto;
     scrollbar-color: #ffffff80 #00000000;
-  }
+}
 
-  /* Chrome, Edge, and Safari */
-  #editor *::-webkit-scrollbar {
+/* Chrome, Edge, and Safari */
+#editor *::-webkit-scrollbar {
     width: 4px;
-  }
+}
 
-  #editor *::-webkit-scrollbar-track {
+#editor *::-webkit-scrollbar-track {
     background: #00000000;
-  }
+}
 
-  #editor *::-webkit-scrollbar-thumb {
+#editor *::-webkit-scrollbar-thumb {
     background-color: #ffffff80;
     border-radius: 10px;
     border: 3px solid #00000000;
-  }
+}
 
 #editor {
     position: relative;
@@ -57,6 +57,13 @@ body {
     position: static;
     top: 0px;
     left: 0px;
+}
+
+#viewHelper {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    z-index: 0;
 }
 
 .lil-gui {
@@ -93,8 +100,9 @@ body {
 }
 
 #GUI>:nth-child(1) {
+    position: relative;
     flex-grow: 3;
-    min-height: 600px;
+    min-height: 50%;
 }
 
 #GUI>:nth-child(2) {
@@ -126,7 +134,7 @@ body {
     right: 15px;
     height: 100%;
     min-width: fit-content;
-    
+
     flex-wrap: nowrap;
     overflow-y: scroll;
 
@@ -182,7 +190,7 @@ body {
 .toolsGUI {
     display: flex;
     --padding: 0.3rem;
-    
+
     --widget-height: 2rem;
     --spacing: 0.3rem;
 }
@@ -198,7 +206,7 @@ body {
 
 .toolsGUI.vertical {
     width: 2.6rem;
-    
+
 }
 
 .toolsGUI.horizontal {
@@ -288,6 +296,14 @@ body {
     overflow-y: scroll;
 }
 
+.elementsGUI>.children .children {
+    border-left: 2px solid black !important;
+    padding-left: 8px;
+    margin-left: 8px !important;
+}
+
+
+
 .title {
     white-space: nowrap;
     overflow: hidden;
@@ -298,6 +314,36 @@ body {
     color: var(--sunglow);
 }
 
+.elementsGUI .lil-gui.blockdisplay>.title::before {
+    font-family: bootstrap-icons !important;
+    content: "\F7D2⠀";
+}
+
+.elementsGUI .lil-gui.blockdisplay.closed>.title::before {
+    font-family: bootstrap-icons !important;
+    content: "\F1C8⠀";
+}
+
+.elementsGUI .lil-gui.itemdisplay>.title::before {
+    font-family: bootstrap-icons !important;
+    content: "\F3E6⠀";
+}
+
+.elementsGUI .lil-gui.itemdisplay.closed>.title::before {
+    font-family: bootstrap-icons !important;
+    content: "\F3E6⠀";
+}
+
+.elementsGUI .lil-gui.collection>.title::before {
+    font-family: bootstrap-icons !important;
+    content: "\F2EA⠀";
+}
+
+.elementsGUI .lil-gui.collection.closed>.title::before {
+    font-family: bootstrap-icons !important;
+    content: "\F4FE⠀";
+}
+
 .selected.itemdisplay>.title {
     color: var(--neon-blue);
 }
@@ -306,7 +352,8 @@ body {
     color: var(--spring-green);
 }
 
-#loading, .dialog {
+#loading,
+.dialog {
     position: absolute;
     top: 0;
     left: 0;
@@ -372,14 +419,14 @@ body {
     left: 1.1em;
     top: 0.6em;
     text-shadow:
-    -1px -1px 0 #000,
-     0   -1px 0 #000,
-     1px -1px 0 #000,
-     1px  0   0 #000,
-     1px  1px 0 #000,
-     0    1px 0 #000,
-    -1px  1px 0 #000,
-    -1px  0   0 #000;
+        -1px -1px 0 #000,
+        0 -1px 0 #000,
+        1px -1px 0 #000,
+        1px 0 0 #000,
+        1px 1px 0 #000,
+        0 1px 0 #000,
+        -1px 1px 0 #000,
+        -1px 0 0 #000;
 }
 
 .dialog {
@@ -394,7 +441,7 @@ body {
 .dialog .lil-gui {
     --width: min(100%, 512px);
     flex-grow: 0;
-    
+
 }
 
 .dialog .lil-gui>.title {
@@ -417,7 +464,7 @@ body {
     flex-direction: row;
 }
 
-.titleCard > * {
+.titleCard>* {
     padding: var(--margin);
 }
 
@@ -425,7 +472,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle, rgba(64,37,209,1) 0%, rgba(0,0,0,1) 100%);
+    background: radial-gradient(circle, rgba(64, 37, 209, 1) 0%, rgba(0, 0, 0, 1) 100%);
 }
 
 .titleCard .description {
@@ -433,17 +480,17 @@ body {
     line-height: 1.5;
 }
 
-.titleCard .description > * {
+.titleCard .description>* {
     margin-bottom: var(--margin);
 }
 
-.titleCard .description a{
+.titleCard .description a {
     color: var(--spring-green);
 }
 
 @media only screen and (max-width: 600px) {
     :root {
-      --margin: 4px;
+        --margin: 4px;
     }
 
     #GUI {
@@ -463,4 +510,4 @@ body {
     #side_container>* {
         width: 100%;
     }
-  }
+}
