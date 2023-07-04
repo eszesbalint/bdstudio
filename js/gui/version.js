@@ -1,9 +1,9 @@
-import { DialogGUI } from './dialog.js';
+import { ModalGUI } from './dialog.js';
 import { ToolsGUI } from './tools.js';
 
 import { decompressJSON } from '../utils.js';
 
-export class VersionGUI extends DialogGUI {
+export class VersionGUI extends ModalGUI {
     constructor(editor, args) {
         super(editor, args);
 

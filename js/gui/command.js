@@ -1,7 +1,7 @@
 import { GUI } from './guiClass.js';
-import { DialogGUI } from './dialog.js';
+import { ModalGUI } from './dialog.js';
 
-class CommandGUI extends DialogGUI {
+class CommandGUI extends ModalGUI {
     constructor(editor, args) {
         super(editor, args);
 

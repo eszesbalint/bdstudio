@@ -1,7 +1,7 @@
 {
     "title" : "BDStudio",
     "stage" : "Beta",
-    "version_number" : "1.2",
-    "description" : "BDStudio's latest release introduces support for <b>item displays</b>, allowing users to showcase items effortlessly. Additionally, the update includes a <b>redesigned GUI</b> for an improved user experience.",
-    "release_notes_link" : ""
+    "version_number" : "1.2.2",
+    "description" : "Minor bugfixes and added a brand new donation dialog for those who wish to support BDStudio.",
+    "release_notes_link" : "/bdstudio#release_notes"
 }

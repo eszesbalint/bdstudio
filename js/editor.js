@@ -12,6 +12,7 @@ import {
     CommandGUI,
     HelpGUI,
     VersionGUI,
+    DonateGUI,
     FileToolsGUI,
     ElementToolsGUI,
     TransformToolsGUI,
@@ -20,7 +21,7 @@ import {
     LoadingGUI,
     MiscGUI,
     VersionToolsGUI,
-    ExportToolsGUI
+    ExportToolsGUI,
 } from './gui/gui.js';
 
 import { History } from './history.js';
@@ -105,9 +106,10 @@ class Editor {
 
         let command = new CommandGUI(this,{autoplace: false, title: 'Command', container: this.domElement});
         let version = new VersionGUI(this,{autoplace: false, title: 'Welcome to BDStudio!', container: this.domElement});
+        let donate = new DonateGUI(this,{autoplace: false, title: 'Enjoy using BDStudio?', container: this.domElement});
 
         let transform = new TransformToolsGUI(this,{autoplace: false, title: '', container: left_tool_strip}, true);
-        let misc = new MiscGUI(this,{autoplace: false, title: '', container: left_tool_strip});
+        let misc = new MiscGUI(this, {autoplace: false, title: '', container: top_tool_strip}, false);
         let loading = new LoadingGUI(this).show('BDStudio');
 
         this.gui = {
@@ -125,6 +127,7 @@ class Editor {
             misc: misc, 
             command: command, 
             version: version,
+            donate: donate,
             transform: transform, 
             loading: loading, 
         }
@@ -196,6 +199,7 @@ class Editor {
 
     group() {
         let objectList = this.find('selected');
+        if (objectList.length === 0) return;
         if (objectList.length === 1) { this.ungroup(); return; }
         let command = new GroupCommand(this, objectList);
         this.history.push(command);

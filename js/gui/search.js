@@ -1,10 +1,10 @@
 import { GUI } from './guiClass.js';
-import { DialogGUI } from './dialog.js';
+import { ModalGUI } from './dialog.js';
 
 import { PropertyCommand } from '../commands/property.js';
 import { assetsPath } from '../elements/BlockDisplay.js';
 
-class SearchGUI extends DialogGUI {
+class SearchGUI extends ModalGUI {
     constructor(editor, args, items=[], prop) {
         super(editor, args);
         this.domElement.classList.add('searchGUI');

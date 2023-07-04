@@ -184,6 +184,7 @@ class BlockDisplay extends Selectable {
             this._blockState = { name: name, variant: correctedVariant }
             blockModelGroup.isBlockModel = true;
 
+            blockStateString = blockStateToString(this.blockState);
             BlockDisplay.loadedModels[blockStateString] = {
                 model: blockModelGroup,
                 possibleVariants: this._possibleVariants,

@@ -1,7 +1,7 @@
 import { GUI } from './guiClass.js';
-import { DialogGUI } from './dialog.js';
+import { ModalGUI } from './dialog.js';
 
-class HelpGUI extends DialogGUI {
+class HelpGUI extends ModalGUI {
     constructor(editor, args) {
         super(editor, args);
         this.domElement.classList.add('helpGUI');

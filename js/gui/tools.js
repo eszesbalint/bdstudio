@@ -228,6 +228,13 @@ export class MiscGUI extends ToolsGUI {
                     editor.gui.help.showModal();
                 },
             },
+            {
+                'tooltip': 'Donate',
+                'icon': 'piggy-bank-fill',
+                'function': function () { 
+                    editor.gui.donate.showModal();
+                },
+            },
         ];
         super(editor, functions, args, vertical);
     }

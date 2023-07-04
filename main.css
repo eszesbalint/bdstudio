@@ -439,7 +439,7 @@ body {
 }
 
 .dialog .lil-gui {
-    --width: min(100%, 512px);
+    --width: min(100%, 700px);
     flex-grow: 0;
 
 }
@@ -465,7 +465,12 @@ body {
 }
 
 .titleCard>* {
-    padding: var(--margin);
+    font-size: 1.2em;
+    padding: 32px;
+}
+
+.titleCard h1 {
+    line-height: 1.2em !important;
 }
 
 .titleCard .logo {
@@ -473,6 +478,10 @@ body {
     align-items: center;
     justify-content: center;
     background: radial-gradient(circle, rgba(64, 37, 209, 1) 0%, rgba(0, 0, 0, 1) 100%);
+}
+
+.titleCard.donate .logo {
+    background: radial-gradient(circle, #1f145c 0%, rgba(0, 0, 0, 1) 100%);
 }
 
 .titleCard .description {
@@ -509,5 +518,9 @@ body {
 
     #side_container>* {
         width: 100%;
+    }
+
+    .titleCard .logo {
+        display: none;
     }
 }

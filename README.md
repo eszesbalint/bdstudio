@@ -26,6 +26,11 @@ The editor provides a user-friendly interface, allowing users to easily manipula
 ### 30 Build Hacks Using COMMANDS! (No Mods!)
 
 ---
+
+[![Minecraft 1.20 Update With INSANE Detail](https://i.ytimg.com/vi/n3Z11rnPPRc/maxresdefault.jpg)](https://www.youtube.com/watch?v=n3Z11rnPPRc "Minecraft 1.20 Update With INSANE Detail") 
+### Minecraft 1.20 Update With INSANE Detail
+
+---
 \
 &nbsp;
 \
@@ -34,6 +39,13 @@ The editor provides a user-friendly interface, allowing users to easily manipula
 
 # Changelog
 [Check out my blog on the latest changes](https://eszesbalint.github.io/tags/#update)
+
+## Beta 1.2.2 Changes
+- Group command no longer hangs if no objects were selected
+- Block models are now stored in memory under the corrected blockstate
+- Added donation dialog
+- Minor GUI changes
+
 ## Beta 1.2.1 Changes
 - Icons in the Elemets list, to easily differentiate between block displays, item displays and collections
 - Pixel grid rendering issues fixed
