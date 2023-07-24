@@ -108,6 +108,15 @@ export class ElementToolsGUI extends ToolsGUI {
                 'secondary_icon': 'search',
                 'function': function () { editor.gui.itemSearch.showModal() },
             },
+            {
+                'title': 'Text',
+                'tooltip': 'Add Text Display',
+                'icon': 'textarea-t',
+                'function': async function () { 
+                    let object = await editor.add('Enter Text', 'TextDisplay');
+                    object.selected = true;
+                },
+            },
             {   
                 'title': 'Duplicate',
                 'tooltip': 'Duplicate Selected',
@@ -244,11 +253,12 @@ export class ExportToolsGUI extends ToolsGUI {
     constructor(editor, args, vertical=false) {
         let functions = [
             {   
-                'title': 'Generate Command',
-                'tooltip': 'Get Command',
-                'icon': 'file-earmark-code-fill',
+                'title': 'Export to Minecraft',
+                'tooltip': 'Export to Minecraft',
+                'icon': 'box-arrow-right',
                 'color': 'var(--spring-green)',
                 'function': function () { 
+                    editor.gui.command.update();
                     editor.gui.command.showModal();
                 },
             },

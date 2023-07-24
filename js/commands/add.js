@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 import { Command } from './command.js';
 
-import { BlockDisplay, ItemDisplay } from '../elements/elements'
+import { BlockDisplay, ItemDisplay, TextDisplay } from '../elements/elements'
 
 class AddCommand extends Command {
     constructor(editor, identifier, type, parentObject) {
@@ -24,6 +24,11 @@ class AddCommand extends Command {
             case 'ItemDisplay':
                 display = new ItemDisplay(this.editor);
                 display.itemState = this.identifier;
+                break;
+
+            case 'TextDisplay':
+                display = new TextDisplay(this.editor);
+                display.text = this.identifier;
                 break;
 
         }

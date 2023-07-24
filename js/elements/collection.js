@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { Selectable } from './selectable.js';
 import { BlockDisplay } from './BlockDisplay.js';
 import { ItemDisplay } from './ItemDisplay.js';
+import { TextDisplay } from './TextDisplay.js';
 
 class Collection extends Selectable {
     constructor(editor) {
@@ -91,6 +92,8 @@ class Collection extends Selectable {
                 object = await BlockDisplay.fromDict(editor, child, keepUUID);
             } else if (child.isItemDisplay) {
                 object = await ItemDisplay.fromDict(editor, child, keepUUID);
+            } else if (child.isTextDisplay) {
+                object = await TextDisplay.fromDict(editor, child, keepUUID);
             } else {
                 object = await BlockDisplay.fromDict(editor, child, keepUUID);
             }

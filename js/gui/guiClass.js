@@ -16,7 +16,13 @@ class GUI extends lilGUI {
             child.destroy();
         }
 
-        
+        for (let child of this.domElement.children){
+            let classList = child.classList;
+            if (!(classList.contains('title') || classList.contains('children') ||classList.contains('lil-gui'))){
+                child.remove();
+            }
+            
+        }
         
     }
 

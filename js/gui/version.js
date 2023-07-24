@@ -34,7 +34,7 @@ export class VersionGUI extends ModalGUI {
                 <a href="${json.release_notes_link}">Release notes</a>
             </div>
             <div class="logo">
-                <img src="images/logo_256x256.png">
+                <img src="images/logo_update_256x256.png">
             </div>
         `;
         scope.domElement.appendChild(titleCard);

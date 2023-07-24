@@ -20,9 +20,6 @@ export class DonateGUI extends DialogGUI {
         this.empty();
         let scope = this;
 
-        let response = await fetch('version.json');
-        let json = await response.json();
-
         let titleCard = document.createElement('div');
         titleCard.classList.add('titleCard');
         titleCard.classList.add('donate');

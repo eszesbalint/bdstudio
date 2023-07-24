@@ -81,6 +81,10 @@ body {
     border-radius: 4pt;
 }
 
+.lil-gui.root {
+    --width: 290px;
+}
+
 .lil-gui>.title {
     border-radius: 4pt;
 }
@@ -324,6 +328,10 @@ body {
     content: "\F1C8⠀";
 }
 
+.selected.itemdisplay>.title {
+    color: var(--neon-blue);
+}
+
 .elementsGUI .lil-gui.itemdisplay>.title::before {
     font-family: bootstrap-icons !important;
     content: "\F3E6⠀";
@@ -332,6 +340,25 @@ body {
 .elementsGUI .lil-gui.itemdisplay.closed>.title::before {
     font-family: bootstrap-icons !important;
     content: "\F3E6⠀";
+}
+
+.selected.textdisplay>.title {
+    color: var(--rose);
+}
+
+.elementsGUI .lil-gui.textdisplay>.title::before {
+    font-family: bootstrap-icons !important;
+    content: "\F263⠀";
+}
+
+.elementsGUI .lil-gui.textdisplay.closed>.title::before {
+    font-family: bootstrap-icons !important;
+    content: "\F264⠀";
+}
+
+
+.selected.collection>.title {
+    color: var(--spring-green);
 }
 
 .elementsGUI .lil-gui.collection>.title::before {
@@ -344,13 +371,9 @@ body {
     content: "\F4FE⠀";
 }
 
-.selected.itemdisplay>.title {
-    color: var(--neon-blue);
-}
 
-.selected.collection>.title {
-    color: var(--spring-green);
-}
+
+
 
 #loading,
 .dialog {
@@ -441,7 +464,6 @@ body {
 .dialog .lil-gui {
     --width: min(100%, 700px);
     flex-grow: 0;
-
 }
 
 .dialog .lil-gui>.title {
@@ -457,6 +479,12 @@ body {
 .dialog .lil-gui>.title>span {
     flex-grow: 3;
 
+}
+
+.dialog>.lil-gui>.children {
+	--widget-height: 32px !important;
+    --padding: 16px;
+    --spacing: 16px;
 }
 
 .titleCard {

@@ -34,7 +34,7 @@ import {
     DuplicateCommand,
 } from './commands/commands.js';
 
-import { BlockDisplay, ItemDisplay, Collection } from './elements/elements.js';
+import { BlockDisplay, ItemDisplay, TextDisplay, Collection } from './elements/elements.js';
 import { assetsPath } from './elements/BlockDisplay.js';
 import { compressJSON, decompressJSON } from './utils.js';
 
@@ -104,7 +104,7 @@ class Editor {
         let itemSearch = new ItemSearchGUI(this,{autoplace: false, title: 'Item search', container: this.domElement});
         let help = new HelpGUI(this,{ autoPlace: false, title: 'Help', container: this.domElement });
 
-        let command = new CommandGUI(this,{autoplace: false, title: 'Command', container: this.domElement});
+        let command = new CommandGUI(this,{autoplace: false, title: 'Export', container: this.domElement});
         let version = new VersionGUI(this,{autoplace: false, title: 'Welcome to BDStudio!', container: this.domElement});
         let donate = new DonateGUI(this,{autoplace: false, title: 'Enjoy using BDStudio?', container: this.domElement});
 
@@ -254,7 +254,10 @@ class Editor {
     async duplicate() {
         this.gui.loading.show('Duplicating');
         let objects = this.find('selected');
-        if (!objects.length) return;
+        if (!objects.length) {
+            this.gui.loading.hide();    
+            return
+        }
         this.control.detach();
         let command = new DuplicateCommand(this, objects);
         this.history.push(command);
@@ -287,6 +290,38 @@ class Editor {
 
 
         return commands;
+    }
+
+    exportMcfunction() {
+        let objects = this.find('isDisplay');
+        let passengers = [''];
+        let counter = 0;
+
+        for (let object of objects) {
+            const passenger = `${object.toNBT()},`;
+            // If command is too large, break it up into a new command
+            if ((passengers[counter] + passenger).length > 32000) {
+                counter++;
+                passengers[counter] = '';
+            }
+            passengers[counter] += `${object.toNBT()},`;
+        }
+
+        let mcfunction = `# ${this.objects.name} created via BDStudio\n# https://eszesbalint.github.io/bdstudio\n\n`;
+        for (let [i, passenger] of passengers.entries()) {
+            passenger = passenger.slice(0, -1);
+            const command = `execute at @s run summon block_display ~ ~ ~ {Passengers:[${passenger}]}`;
+            mcfunction += `# Command ${i+1}\n${command}\n\n`
+        }
+
+        // Create a programmatic download link
+        const elem = window.document.createElement("a");
+        elem.href = window.URL.createObjectURL(new Blob([mcfunction]));
+        elem.download = `summon_${this.objects.name}.mcfunction`;
+        document.body.appendChild(elem);
+        elem.click();
+        document.body.removeChild(elem);
+
     }
 
     async saveBlockDisplaysToFile() {
@@ -347,7 +382,7 @@ class Editor {
     objectsToJSON(objects, keepUUID = false) {
         let list = [];
         for (let child of objects) {
-            if (child.isBlockDisplay || child.isItemDisplay || child.isCollection) {
+            if (child.isBlockDisplay || child.isItemDisplay || child.isTextDisplay || child.isCollection) {
                 list.push(child.toDict(keepUUID));
             }
         }
@@ -367,6 +402,8 @@ class Editor {
                 object = await BlockDisplay.fromDict(scope, dict, keepUUID);
             } else if (dict.isItemDisplay) {
                 object = await ItemDisplay.fromDict(scope, dict, keepUUID);
+            } else if (dict.isTextDisplay) {
+                object = await TextDisplay.fromDict(scope, dict, keepUUID);
             } else {
                 object = await BlockDisplay.fromDict(scope, dict, keepUUID);
             }

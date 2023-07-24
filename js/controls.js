@@ -125,7 +125,7 @@ class Controls {
                     break;
 
                 case 'd': // D
-                    editor.duplicate();
+                    await editor.duplicate();
                     editor.update();
                     break;
 

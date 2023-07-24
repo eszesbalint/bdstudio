@@ -32,6 +32,9 @@ class ElementsGUI extends GUI {
                 if (object.isItemDisplay) {
                     folder.domElement.classList.add('itemdisplay');
                 }
+                if (object.isTextDisplay) {
+                    folder.domElement.classList.add('textdisplay');
+                }
                 if (object.isCollection) {
                     folder.domElement.classList.add('collection');
                 }
@@ -56,7 +59,7 @@ class ElementsGUI extends GUI {
 
             } else if (object.isCollection) {
                 forEachChild(object, function (child) {
-                    if (child.isBlockDisplay || child.isItemDisplay || child.isCollection) {
+                    if (child.isBlockDisplay || child.isItemDisplay || child.isTextDisplay || child.isCollection) {
                         buildRecursively(folder, child);
                     }
                 });

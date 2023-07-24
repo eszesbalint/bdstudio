@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { yellow, green, blue } from '../gui/colors.js';
+import { yellow, green, blue, red } from '../gui/colors.js';
 
 class Selectable extends THREE.Group {
     constructor(editor) {
@@ -38,6 +38,7 @@ class Selectable extends THREE.Group {
             let color = undefined;
             if (this.isBlockDisplay) color = yellow;
             if (this.isItemDisplay) color = blue;
+            if (this.isTextDisplay) color = red;
             if (this.isCollection) color = green;
 
             let parent = this.parent;
