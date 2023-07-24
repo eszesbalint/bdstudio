@@ -1,7 +1,0 @@
-{
-    "title" : "BDStudio",
-    "stage" : "Beta",
-    "version_number" : "1.3",
-    "description" : "All three types of display entities are supported now, including <b>text displays</b>! With the power of Unifont you can add text to your creations in any language!",
-    "release_notes_link" : "/bdstudio#release_notes"
-}
