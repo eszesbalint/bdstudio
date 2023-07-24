@@ -1,4 +1,4 @@
-![](Screenshot_20230629_171332.png)
+![](Screenshot_20230724_140021.png)
 [![](try_bdstudio.png)](https://eszesbalint.github.io/bdstudio)
 \
 &nbsp;
@@ -39,6 +39,13 @@ The editor provides a user-friendly interface, allowing users to easily manipula
 
 # Changelog
 [Check out my blog on the latest changes](https://eszesbalint.github.io/tags/#update)
+
+## Beta 1.3 Changes
+- Added text displays
+- Duplicate command no longer hangs if no objects were selected
+- Redesigned command generation GUI
+- New export option: .mcfunction
+- Other minor GUI changes
 
 ## Beta 1.2.2 Changes
 - Group command no longer hangs if no objects were selected
